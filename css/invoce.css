@@ -1,0 +1,117 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  background:#f4f4f4;
+  padding:20px;
+  color:#222;
+}
+
+/* NAVBAR */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#111;
+  padding:12px 20px;
+  border-radius:8px;
+  margin-bottom:20px;
+}
+header img{height:40px}
+nav ul{display:flex;gap:18px;list-style:none}
+nav a{color:#fff;text-decoration:none;font-weight:600}
+
+/* HEADER NOTA */
+.header{
+  display:flex;
+  justify-content:space-between;
+  background:#fff;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:15px;
+  border:1px solid #ddd;
+}
+.header .logo{height:55px}
+
+/* INPUT */
+.select-area{
+  display:flex;
+  gap:10px;
+  margin:10px 0;
+  flex-wrap:wrap;
+}
+.field{display:flex;flex-direction:column}
+input,select,button{
+  padding:7px 10px;
+  border-radius:5px;
+  border:1px solid #ccc;
+}
+button{cursor:pointer;background:#111;color:#fff;border:none}
+button:hover{background:#333}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  margin-top:10px;
+}
+thead{background:#111;color:#fff}
+th,td{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  text-align:center;
+}
+th:first-child,td:first-child{text-align:left}
+.del{color:red;cursor:pointer;font-weight:bold}
+
+/* TOTAL */
+.total{margin-top:10px;font-weight:600}
+.grand-total{font-size:22px;font-weight:800;margin-top:5px}
+
+/* PRINT */
+.print-only{display:none}
+
+@media print{
+  body{background:#fff;padding:0}
+  header,.no-print{display:none!important}
+  .print-only{display:table-cell!important}
+  table{font-size:12px}
+}
+
+@page{
+  size:A4 landscape;
+  margin:15mm;
+}
+.btn-logout {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-logout:hover {
+  background: #c62828;
+}
+/* GROUP TOMBOL BAWAH */
+.btn-group{
+  display: flex;
+  gap: 15px;        /* jarak antar tombol */
+  margin-top: 12px;
+  flex-wrap: wrap; /* biar rapi di layar kecil */
+}
+
+/* AREA DISKON */
+.discount-area{
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
