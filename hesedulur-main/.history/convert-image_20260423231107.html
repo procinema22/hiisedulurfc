@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+<meta charset="UTF-8">
+<title>Convert HEIC ke JPG</title>
+<link rel="stylesheet" href="convert.css">
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    <h2>🛠 Tools Center</h2>
+  </div>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Cetak Foto</a></li>
+      <li><a href="convert-image.html">Convert Gambar</a></li>
+    </ul>
+  </nav>
+
+</header>
+
+
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <aside class="left-panel convert-box">
+
+      <div class="section-title">Convert HEIC ke JPG</div>
+
+      <label>Pilih gambar</label>
+      <input type="file" id="imgInput" multiple accept=".heic,.heif,image/*">
+
+      <button id="convertImg" class="btn green">Convert</button>
+      <button id="zipImg" class="btn purple" disabled>Download ZIP</button>
+
+      <p id="loadingImg">⏳ Sedang memproses...</p>
+
+  </aside>
+
+
+  <!-- CENTER PANEL -->
+  <section class="center-panel">
+
+      <div class="preview-grid" id="resultImg"></div>
+
+  </section>
+
+
+  <!-- RIGHT PANEL (kosong supaya layout tidak rusak) -->
+  <aside class="right-panel">
+
+      <div class="section-title">Info</div>
+
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">
+      Upload file HEIC dari iPhone lalu convert ke JPG agar bisa dicetak
+      atau digunakan di aplikasi lain.
+      </p>
+
+  </aside>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver"></script>
+
+<script src="convert.js"></script>
+
+</body>
+</html>

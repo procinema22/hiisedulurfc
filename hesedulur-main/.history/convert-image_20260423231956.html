@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Convert HEIC ke JPG</title>
+
+<link rel="stylesheet" href="css/cetak.css">
+
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+
+<div class="section-title">Upload Gambar</div>
+
+<div class="drop-area" id="dropArea">
+Drag atau klik upload HEIC
+</div>
+
+<input type="file" id="heicInput" accept=".heic,image/heic" hidden>
+
+</div>
+
+
+<!-- CENTER PANEL -->
+<div class="center-panel">
+
+<div class="section-title">Preview</div>
+
+<img id="preview">
+
+</div>
+
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+
+<div class="section-title">Tools</div>
+
+<button class="btn blue" onclick="convertHEIC()">
+Convert ke JPG
+</button>
+
+<a id="downloadJPG" class="btn green">
+Download JPG
+</a>
+
+</div>
+
+</div>
+
+<script src="js/convert-heic.js"></script>
+
+</body>
+</html>

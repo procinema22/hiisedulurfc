@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SEDULUR FOTO COPY – Cetak Foto</title>
+
+  <link rel="icon" type="image/png" href="img/loggo/sdlr.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/cetak.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header>
+  <div class="logo">
+    <a href="index.html">
+      <img src="img/loggo/sdlr.png" alt="Sedulur Foto Copy">
+    </a>
+  </div>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="cetakfoto.html" class="active">Cetak Foto</a></li> 
+      <li><a href="cetakfoto.html" class="active">Cetak Foto</a></li> 
+      
+    </ul>
+  </nav>
+</header>
+
+<!-- ================= LAYOUT ================= -->
+<div class="layout">
+
+  <!-- ========= PANEL KIRI ========= -->
+  <aside class="left-panel">
+
+    <h2 class="section-title">TERIMA KASIH SUDAH MENGUNAKAN LAYANAN KAMI update v4</h2>
+
+    <label>Pilih Mode Cetak</label>
+    <select id="modeSelect">
+      <option value="normal">Mode LAPRAK OTOMATIS</option>
+      <option value="perfoto">Mode PAS FOTO</option>
+      <option value="circle">Mode LINGKARAN</option>
+    </select>
+
+    <div id="circleControls" style="display:none;">
+      <label>Diameter Lingkaran (cm)</label>
+      <input id="circleDiameter" type="number" value="4">
+    </div>
+
+    <label>Pilih Ukuran Kotak (cm)</label>
+    <select id="sizeSelect">
+      <option value="2x3">2 x 3</option>
+      <option value="3x4">3 x 4</option>
+      <option value="4x6">4 x 6</option>
+      <option value="5x5">5 x 5</option>
+      <option value="6x9">6 x 9</option>
+      <option value="10x15">10 x 15</option>
+      <option value="custom">Custom...</option>
+    </select>
+
+    <div id="customSize" style="display:none;">
+      <input id="customW" type="number" placeholder="Lebar (cm)">
+      <input id="customH" type="number" placeholder="Tinggi (cm)">
+    </div>
+
+    <label>Upload Foto (banyak)</label>
+    <div id="dropArea" class="drop-area">
+      Tarik & Letakkan Foto / Klik
+    </div>
+    <input id="upload" type="file" multiple accept="image/*" hidden>
+
+    <label>
+      <input type="checkbox" id="manualHargaCheckbox">
+      Gunakan Harga Manual
+    </label>
+
+    <div id="manualHargaBox" style="display:none;">
+      <label>Harga Manual (Rp)</label>
+      <input 
+  id="manualHargaInput"
+  type="number"
+  value="500"
+  min="500"
+  step="500">
+    </div>
+
+    <label>
+      <input type="checkbox" id="hideInfo">
+      Sembunyikan Nama & Harga di PDF
+    </label>
+
+    <label>Margin (mm)</label>
+    <input id="marginInputMm" type="number" value="5">
+
+    <label>Gap antar foto (px)</label>
+    <input id="gap" type="number" value="20">
+
+    <label>Nama Pelanggan</label>
+    <input id="userName" type="text" placeholder="Nama pengguna">
+
+    <label>
+      <input type="checkbox" id="laprakMode">
+      Mode Laprak Manual
+    </label>
+
+    <div id="laprakControls" style="display:none;">
+      <label>Nama Laprak</label>
+      <input type="text" id="laprakName">
+      <label>Harga Laprak (Rp)</label>
+      <input type="number" id="laprakPrice" value="2000">
+    </div>
+
+    <div class="price" id="priceDisplay">Harga: Rp 0</div>
+    <div id="batchList"></div>
+
+    <label>
+      <input type="checkbox" checked disabled>
+      hubungi admin untuk menghilangkan watermark
+    </label>
+
+  </aside>
+
+  <!-- ========= PANEL TENGAH ========= -->
+  <section class="center-panel">
+    <canvas id="canvas" width="1240" height="1754"></canvas>
+
+    <div class="page-nav" id="pageNav" style="display:none;">
+      <button id="prevPage">⬅</button>
+      <div id="pageIndicator">Halaman 1 / 1</div>
+      <button id="nextPage">➡</button>
+    </div>
+  </section>
+
+  <!-- ========= PANEL KANAN ========= -->
+  <aside class="right-panel">
+    <h2 class="section-title">⚡ Aksi Cepat</h2>
+    <button id="previewBtn" class="btn blue">👁 Preview Cepat</button>
+    <button id="generateBtn" class="btn green">📄 Buat Kolase</button>
+    <button id="downloadPdf" class="btn purple">💾 Buka PDF</button>
+    <button id="reset" class="btn red">🔁 Reset</button>
+  </aside>
+
+</div>
+
+<!-- ================= LOADING ================= -->
+<div id="loadingOverlay">
+  <div class="loader"></div>
+  <p>Memproses... tunggu sebentar ya</p>
+</div>
+
+<div id="toast"></div>
+
+<script src="js/script.js"></script>
+
+<!-- ================= FIREBASE AUTH ================= -->
+
+
+</body>
+</html>

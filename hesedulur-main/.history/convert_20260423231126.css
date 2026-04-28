@@ -1,0 +1,70 @@
+/* ============ CONVERT IMAGE TOOL ============ */
+
+.convert-box{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  
+  .convert-box h2{
+    font-size:18px;
+    margin-bottom:10px;
+  }
+  
+  #imgInput{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#020617;
+    color:white;
+  }
+  
+  /* preview hasil convert */
+  .preview-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:14px;
+    width:100%;
+  }
+  
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:10px;
+    border-radius:10px;
+    box-shadow:0 4px 12px var(--shadow);
+    text-align:center;
+    transition:.2s;
+  }
+  
+  .card:hover{
+    transform:translateY(-3px);
+    border-color:var(--blue);
+  }
+  
+  .card img{
+    width:100%;
+    border-radius:6px;
+    margin-bottom:6px;
+  }
+  
+  /* loading text */
+  #loadingImg{
+    display:none;
+    font-size:13px;
+    color:var(--muted);
+  }
+  
+  /* responsive */
+  @media(max-width:900px){
+  
+    .layout{
+      grid-template-columns:1fr;
+    }
+  
+    .left-panel{
+      border-right:none;
+      border-bottom:1px solid var(--border);
+    }
+  
+  }

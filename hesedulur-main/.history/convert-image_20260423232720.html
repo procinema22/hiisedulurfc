@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Convert HEIC ke JPG</title>
+
+<link rel="stylesheet" href="css/cetak.css">
+
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+
+<div class="logo">
+<img src="img/logo.png">
+</div>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="cetakfoto.html">Cetak Foto</a>
+<a href="convert-image.html">Convert Image</a>
+</nav>
+
+</header>
+
+
+<div class="layout">
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+
+<h3>HEIC Converter</h3>
+
+<p>Upload gambar HEIC</p>
+
+<div id="dropArea" class="upload-box">
+Tarik & Letakkan HEIC
+<br>
+atau klik upload
+</div>
+
+<input type="file" id="fileInput" accept=".heic,image/heic" multiple hidden>
+
+<div style="margin-top:20px">
+
+<label>Format Output</label>
+
+<select id="format">
+<option value="image/jpeg">JPG</option>
+<option value="image/png">PNG</option>
+</select>
+
+</div>
+
+</div>
+
+
+<!-- CENTER PREVIEW -->
+<div class="center-panel">
+
+<h3 style="text-align:center">Preview File</h3>
+
+<div id="previewList" class="preview-list"></div>
+
+</div>
+
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+
+<h3>Aksi Cepat</h3>
+
+<button class="btn blue" id="convertBtn">
+Convert Sekarang
+</button>
+
+<button class="btn purple" id="downloadAll">
+Download Semua
+</button>
+
+<button class="btn red" onclick="location.reload()">
+Reset
+</button>
+
+<div class="progress">
+
+<div id="progressBar"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/convert.js"></script>
+
+</body>
+</html>

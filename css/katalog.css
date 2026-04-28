@@ -1,0 +1,505 @@
+/* ===============================
+   RESET & GLOBAL
+================================ */
+* {
+    margin: 0;
+    padding: 550;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  body {
+    background-color: #faf7f3;
+    color: #333;
+  }
+  
+  /* ===============================
+     NAVBAR
+  ================================ */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 50px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo img {
+    height: 45px;
+    width: auto;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+  }
+  
+  nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  nav a:hover {
+    color: #b70d0d;
+  }
+  
+  .search-box {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    overflow: hidden;
+    width: 260px;
+  }
+  
+  .search-box input {
+    border: none;
+    padding: 8px 15px;
+    width: 100%;
+    outline: none;
+  }
+  
+  .search-box button {
+    background: #b70d0d;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+  }
+  
+  /* ===============================
+     HERO
+  ================================ */
+  .hero {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .hero-banner {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  
+  /* ===============================
+     SECTION TITLE
+  ================================ */
+  .section-title {
+    text-align: center;
+    margin: 40px 0 20px;
+    font-size: 1.5em;
+    font-weight: 600;
+  }
+  
+  /* ===============================
+     PRODUCT GRID
+  ================================ */
+  .products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+    padding: 0 50px 60px;
+  }
+  
+  /* CARD (UNTUK <a> & <div>) */
+  .product-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  
+    /* PENTING: hilangkan style link */
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .product-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+  
+  .product-info {
+    padding: 10px 15px;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  /* FORCE LINK TETAP NORMAL */
+  .product-card:visited,
+  .product-card:active,
+  .product-card:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+  
+  /* ===============================
+     CHAT BUTTON
+  ================================ */
+  .chat-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #b70d0d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  
+  .chat-btn:hover {
+    background: #d61616;
+  }
+  
+  /* ===============================
+     RESPONSIVE
+  ================================ */
+  @media (max-width: 768px) {
+    header {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .products {
+      padding: 0 230px 40px;
+    }
+  
+    .section-title {
+      font-size: 1.3em;
+    }
+  }
+  .product-detail{
+    display:flex;
+    gap:30px;
+    padding:40px;
+  }
+  
+  .product-image img{
+    width:380px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+  }
+  
+  .product-info{
+    max-width:600px;
+  }
+  
+  #priceTable{
+    width:100%;
+    border-collapse:collapse;
+    margin:15px 0;
+  }
+  
+  #priceTable th, #priceTable td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:left;
+  }
+  .login-box {
+    width: 320px;
+    margin: 120px auto;
+    padding: 205px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .login-box h2 {
+    text-align: center;
+  }
+  
+  .login-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+  }
+  
+  .login-box button {
+    width: 100%;
+    padding: 10px;
+    background: #000;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  #error {
+    color: red;
+    text-align: center;
+    margin-top: 8px;
+  }
+  /* ================= DARK MODE VARIABLE ================= */
+  :root {
+    --bg: #ffffff;
+    --text: #111111;
+    --card: #f5f5f5;
+    --header: #ffffff;
+  }
+  
+  body.dark {
+    --bg: #0f0f0f;
+    --text: #f1f1f1;
+    --card: #1e1e1e;
+    --header: #121212;
+  }
+  
+  /* ================= APPLY VARIABLE ================= */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  header {
+    background: var(--header);
+  }
+  
+  .product-card {
+    background: var(--card);
+  }
+  
+  /* ================= DARK MODE BUTTON ================= */
+  .dark-toggle {
+    margin-left: 15px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  
+  /* HERO IMAGE TETAP TERANG */
+  .hero img {
+    filter: brightness(0.95);
+  }
+  .btn-logout {
+    background: #e53935;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .btn-logout:hover {
+    background: #c62828;
+  }
+  
+  /* ================= PARTNER ================= */
+  .partner {
+    padding: 80px 20px;
+    text-align: center;
+    background: #fff;
+    color: #000;
+  }
+  
+  .partner h3 {
+    font-size: 1.6rem;
+    margin-bottom: 40px;
+  }
+  
+  .partner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 30px;
+    max-width: 1000px;
+    margin: auto;
+  }
+  
+  .partner-grid img {
+    max-height: 60px;
+    object-fit: contain;
+    filter: grayscale(100%);
+    opacity: 0.85;
+  }
+  
+  /* ================= CTA ================= */
+  .cta {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 20px;
+    background: #f5f5f5;
+    flex-wrap: wrap;
+  }
+  
+  .cta-btn {
+    background: #00a859;
+    color: #fff;
+    padding: 14px 26px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  /* ================= FOOTER ================= */
+  .footer {
+    background: #0f0f0f;
+    color: #ccc;
+    padding: 60px 20px 20px;
+  }
+  
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: auto;
+  }
+  
+  .footer h4 {
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  
+  .footer a {
+    display: block;
+    color: #ccc;
+    text-decoration: none;
+    margin-bottom: 8px;
+  }
+  
+  .footer-logo {
+    height: 50px;
+    margin-bottom: 10px;
+  }
+  
+  .payment img {
+    height: 28px;
+    margin: 6px;
+    background: #fff;
+    padding: 4px;
+    border-radius: 6px;
+  }
+  
+  .footer-bottom {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.85rem;
+    opacity: 0.6;
+  }
+  /* GRID */
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 150px;
+  }
+  
+  /* CARD */
+  .catalog-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    position: relative;
+    overflow: hidden;
+    transition: transform .25s ease;
+  }
+  
+  .catalog-card:hover {
+    transform: translateY(-6px);
+  }
+  
+  /* GAMBAR */
+  .catalog-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #f8f8f8;
+    padding: 12px;
+  }
+  
+  /* INFO */
+  .card-info {
+    padding: 12px;
+  }
+  
+  .card-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  
+  .price {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  /* BADGE DISKON */
+  .badge-discount {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #1e7f34;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    z-index: 2;
+  }
+  /* HERO IMAGE TETAP TERANG */
+.hero img {
+    filter: brightness(0.95);
+  }
+  .btn-logout {
+    background: #e53935;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .btn-logout:hover {
+    background: #c62828;
+  }
+  .btn-login {
+    background: #2563eb;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .btn-login:hover {
+    background: #1d4ed8;
+  }
+  nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  list-style: none;
+}

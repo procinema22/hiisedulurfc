@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Convert HEIC ke JPG</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+.convert-box{
+  padding:20px;
+}
+.preview-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,150px);
+  gap:12px;
+  margin-top:20px;
+}
+.card{
+  background:#111d38;
+  padding:10px;
+  border-radius:10px;
+}
+.card img{
+  width:100%;
+  border-radius:6px;
+}
+#loadingImg{
+  display:none;
+  margin-top:10px;
+  color:#22c55e;
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <h1 class="logo">🛠 Tools Center</h1>
+    <ul class="nav-links">
+      <li><a href="index.html">Cetak Foto</a></li>
+      <li><a href="convert-image.html">Convert Gambar</a></li>
+      <li><a href="invoice/invoce.html">invoice</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="left-panel convert-box">
+      <h2>Convert HEIC ke JPG</h2>
+      <input type="file" id="imgInput" multiple accept=".heic,.heif,image/*">
+      <button id="convertImg" class="btn green">Convert</button>
+      <button id="zipImg" class="btn purple" disabled>Download ZIP</button>
+      <p id="loadingImg">⏳ Sedang memproses...</p>
+  </aside>
+
+  <section class="center-panel">
+      <div class="preview-grid" id="resultImg"></div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver"></script>
+
+<script>
+let convertedImgs = [];
+
+document.getElementById("convertImg").onclick = async ()=>{
+ let files = document.getElementById("imgInput").files;
+ let result = document.getElementById("resultImg");
+ let loading = document.getElementById("loadingImg");
+ let zipBtn = document.getElementById("zipImg");
+
+ if(!files.length) return alert("Pilih gambar dulu");
+
+ result.innerHTML = "";
+ convertedImgs = [];
+ loading.style.display="block";
+
+ for(let f of files){
+   try{
+     const blob = await heic2any({ blob:f, toType:"image/jpeg", quality:0.9 });
+     const url = URL.createObjectURL(blob);
+     const fileName = f.name.replace(/\.heic/gi,"") + ".jpg";
+
+     convertedImgs.push({name:fileName, blob});
+
+     result.innerHTML += `
+       <div class="card">
+        <img src="${url}">
+        <a href="${url}" download="${fileName}">
+          <button class="btn blue" style="margin-top:6px">Download</button>
+        </a>
+       </div>
+     `;
+   }catch(e){
+     alert("Gagal convert "+f.name);
+   }
+ }
+
+ loading.style.display="none";
+ zipBtn.disabled = convertedImgs.length === 0;
+};
+
+document.getElementById("zipImg").onclick = ()=>{
+ const zip = new JSZip();
+ convertedImgs.forEach(f=> zip.file(f.name,f.blob));
+ zip.generateAsync({type:"blob"}).then(file=>{
+  saveAs(file,"Image-Converted.zip");
+ });
+};
+</script>
+
+</body>
+</html>

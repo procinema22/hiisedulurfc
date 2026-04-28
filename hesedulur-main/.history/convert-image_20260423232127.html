@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HEIC to JPG Converter</title>
+
+<link rel="stylesheet" href="css/convert.css">
+
+<script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- LEFT -->
+<div class="left-panel">
+
+<h2>Upload HEIC</h2>
+
+<div id="dropArea" class="drop-area">
+Drag & Drop HEIC disini
+<br>
+atau klik upload
+</div>
+
+<input type="file" id="fileInput" accept=".heic,image/heic" multiple hidden>
+
+</div>
+
+
+<!-- CENTER -->
+<div class="center-panel">
+
+<h2>Preview Files</h2>
+
+<div id="previewList" class="preview-list"></div>
+
+</div>
+
+
+<!-- RIGHT -->
+<div class="right-panel">
+
+<h2>Tools</h2>
+
+<button id="convertBtn" class="btn blue">
+Convert Semua
+</button>
+
+<button id="downloadAll" class="btn green">
+Download Semua
+</button>
+
+<div class="progress">
+
+<div id="progressBar"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/convert.js"></script>
+
+</body>
+</html>

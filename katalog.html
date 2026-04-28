@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TITLE TAB -->
+  <title>KATALOG</title>
+
+  <!-- FAVICON TAB (LOGO KECIL) -->
+  <link rel="icon" type="image/png" href="img/loggo/sdlr.png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/katalog.css">
+ 
+  
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+  <header>
+    <div class="logo">
+      <img src="img/loggo/sdlr.png" alt="Sedulur Foto Copy Logo">
+    </div>
+  
+    <nav>
+      <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="katalog.html">Katalog</a></li>
+        <li><a href="cetakfoto.html">Cetak Foto</a></li>
+        <li><a href="cetakinvoice.html">Invoice</a></li>
+        <li><a href="#">About Us</a></li>
+  
+        <li>
+          <button class="dark-toggle" onclick="toggleDarkMode()" title="Mode Gelap">
+            🌙
+          </button>
+        </li>
+  
+        <li id="authAction">
+          <!-- Login / Logout dari JS -->
+        </li>
+      </ul>
+    </nav>
+  </header>
+  
+</header>
+
+<!-- ================= HERO ================= -->
+
+<!-- ================= KATALOG ================= -->
+<h2 class="section-title">KATALOG PRODUK</h2>
+
+<section class="catalog-grid">
+
+  <!-- CARD PRODUK -->
+  <div class="catalog-card">
+    <a href="detail.html?id=stiker-label" class="product-card"></a>
+    <img src="img/layanan/hitamputih.png" alt="Produk">
+    <div class="card-info">
+      <h3>Print Hitam Putih</h3>
+      <p class="price">Rp. 300</p>
+    </div>
+  </div>
+
+  <div class="catalog-card">
+    <img src="img/layanan/warna.png" alt="Produk">
+    <div class="card-info">
+      <h3>Print Warna</h3>
+      <p class="price">Rp. 500</p>
+    </div>
+  </div>
+
+  <div class="catalog-card">
+    <img src="img/layanan/hardcover.jpg" alt="Produk">
+    <div class="card-info">
+      <h3>Jilid</h3>
+      <p class="price">Rp. 4000</p>
+    </div>
+  </div>
+  <div class="catalog-card">
+    <img src="img/layanan/stikeer.jpg" alt="Produk">
+    <div class="card-info">
+      <h3>Stiker</h3>
+      <p class="price">Rp. 4000</p>
+    </div>
+  </div>
+  <div class="catalog-card">
+    <img src="img/layanan/stikeer.jpg" alt="Produk">
+    <div class="card-info">
+      <h3>Stiker</h3>
+      <p class="price">Rp. 4000</p>
+    </div>
+  </div>
+  <div class="catalog-card">
+    <img src="img/layanan/hardcover.jpg" alt="Produk">
+    <div class="card-info">
+      <h3>Jilid</h3>
+      <p class="price">Rp. 4000</p>
+    </div>
+  </div>
+  <div class="catalog-card">
+    <img src="img/layanan/stikeer.jpg" alt="Produk">
+    <div class="card-info">
+      <h3>Stiker</h3>
+      <p class="price">Rp. 4000</p>
+    </div>
+  </div>
+  <div class="catalog-card">
+    <img src="img/layanan/stikeer.jpg" alt="Produk">
+    <div class="card-info">
+      <h3>Stiker</h3>
+      <p class="price">Rp. 4000</p>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ================= CHAT BUTTON ================= -->
+<button class="chat-btn" onclick="alert('Hubungi kami di WhatsApp! 📞')">💬</button>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+    <div class="footer-grid">
+  
+      <!-- BRAND -->
+      <div>
+        <img src="img/loggo/sdlrputih.png" class="footer-logo">
+        <p>
+          Gedung D5 FMIPA UNNES<br>
+          Gunungpati, Semarang<br>
+          
+        </p>
+        <a href="https://maps.app.goo.gl/rCYBtEVzuDju5Ed66" target="_blank">Lihat di Google Maps</a>
+      </div>
+  
+      <!-- INFO -->
+      <div>
+        <h4>Informasi</h4>
+        <a href="#">Tentang Kami</a>
+        <a href="home.html">Produk & Layanan</a>
+        <a href="#">Cara Pemesanan</a>
+      </div>
+  
+      <!-- PEMBAYARAN -->
+      <div>
+        <h4>Terima Pembayaran</h4>
+        <div class="payment">
+          <img src="img/pyment/QRIS_Logo.svg">
+          <img src="img/pyment/01-Mandiri Master Brand Logo.png">
+          <img src="img/pyment/Bank_Central_Asia.svg">
+          <img src="img/pyment/Bank_Negara_Indonesia_logo_(2004).svg.png">
+        </div>
+      </div>
+  
+      <!-- PENGIRIMAN -->
+      <script src="js/detail.js"></script>
+      <script src="js/auth.js" type="module"></script>
+      <script>
+        authGuard(false);
+      </script>
+      
+      <script src="js/detail.js"></script>
+  
+    <div class="footer-bottom">
+      © 2026 Sedulur Foto Copy — All Rights Reserved
+    </div>
+  </footer>
+  
