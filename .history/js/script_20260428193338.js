@@ -49,122 +49,19 @@
     const marginRight = document.getElementById('marginRight');
     
     /* ---------------------------
-   Constants & Global State
-   Final Clean Version
---------------------------- */
-
-/* ukuran preview canvas */
-const PREVIEW_SCALE = 0.25;
-
-/* konversi cm ke pixel (300 DPI approx) */
-const PX_PER_CM = 118;
-
-/* localStorage key */
-const STORAGE_KEY = "cetakfoto_v3_placements";
-
-/* ===========================
-   MAIN DATA STORAGE
-=========================== */
-
-/*
-batches = daftar semua upload user
-
-contoh isi:
-[
-  {
-    id: 1,
-    files: [...],
-    size: "2x3",
-    customW: 2,
-    customH: 3,
-    copy: 2,
-    mode: "circle",
-    circleDiameter: 4
-  }
-]
-*/
-let batches = [];
-
-/*
-placementsByPage = hasil susunan foto per halaman
-
-[
-  [foto1, foto2, foto3],   // halaman 1
-  [foto4, foto5]           // halaman 2
-]
-*/
-let placementsByPage = [];
-
-/*
-cache hasil render halaman
-biar preview cepat
-*/
-let pagesCache = [];
-
-/* ===========================
-   UI STATE
-=========================== */
-
-/* halaman aktif preview */
-let currentPageIndex = 0;
-
-/* foto terpilih saat drag */
-let selectedPlacement = null;
-
-/* status drag */
-let isDragging = false;
-
-/* titik awal drag */
-let dragStart = null;
-
-/* watermark on/off */
-let watermarkEnabled = false;
-
-/* ===========================
-   EXTRA CONTROL
-=========================== */
-
-/* id batch auto increment */
-let batchIdCounter = 1;
-
-/* loading process */
-let isRendering = false;
-
-/* prevent double click generate */
-let isGenerating = false;
-
-/* ===========================
-   RESET FUNCTION
-=========================== */
-
-function resetState() {
-  batches = [];
-  placementsByPage = [];
-  pagesCache = [];
-
-  currentPageIndex = 0;
-  selectedPlacement = null;
-
-  isDragging = false;
-  dragStart = null;
-
-  watermarkEnabled = false;
-
-  batchIdCounter = 1;
-  isRendering = false;
-  isGenerating = false;
-}
-
-/* ===========================
-   DEBUG
-=========================== */
-
-function debugState() {
-  console.log("batches:", batches);
-  console.log("placements:", placementsByPage);
-  console.log("pagesCache:", pagesCache.length);
-  console.log("page aktif:", currentPageIndex + 1);
-}
+        Constants & state
+        --------------------------- */
+    const PREVIEW_SCALE = 0.25;
+    const PX_PER_CM = 118; // px per cm for 300dpi ~ approximate mapping used in original script
+    const STORAGE_KEY = 'cetakfoto_v3_placements';
+    
+    let batches = []; // array of { files, size, customW, customH, copy, mode }
+    let placementsByPage = []; // array per page of placements
+    let pagesCache = []; // preview/full canvases
+    let currentPageIndex = 0;
+    let selectedPlacement = null;
+    let isDragging = false, dragStart = null;
+    let watermarkEnabled = false;
 
 
     
@@ -312,33 +209,12 @@ async function autoPreview() {
   await buildPlacementsForPages();
 
   const result = await renderAllPagesToCanvases();
+
   pagesCache = result.pages || [];
 
   showPageAtIndex(0);
 
   await updatePricePreview();
-}
-
-async function updatePricePreview() {
-  if (!batches.length) {
-    priceDisplay.textContent = "Harga: Rp 0";
-    return;
-  }
-
-  if (manualHargaCheckbox?.checked) {
-    const val = parseInt(manualHargaInput.value) || 0;
-    priceDisplay.textContent =
-      "Harga: Rp " + val.toLocaleString();
-    return;
-  }
-
-  const result =
-    await computeTotalPriceForPreviewOrGenerate();
-
-  const total = result.grandTotal || 0;
-
-  priceDisplay.textContent =
-    "Harga: Rp " + total.toLocaleString();
 }
 
 async function updatePricePreview() {
@@ -364,12 +240,22 @@ async function addFilesToBatch(files) {
     (modeSelect && modeSelect.value) || "normal";
 
   const batchData = {
-    files: files,
+    files,
     copy: 1,
-    mode: mode
+    mode
   };
 
-  if (sizeSelect && sizeSelect.value === "custom") {
+  /* ukuran lingkaran disimpan per batch */
+  if (mode === "circle") {
+    batchData.circleDiameter =
+      parseFloat(circleDiameter?.value) || 4;
+  }
+
+  /* ukuran custom */
+  if (
+    sizeSelect &&
+    sizeSelect.value === "custom"
+  ) {
     batchData.size = "custom";
     batchData.customW =
       parseFloat(customW?.value) || 2;
@@ -377,37 +263,52 @@ async function addFilesToBatch(files) {
       parseFloat(customH?.value) || 3;
   } else {
     batchData.size =
-      (sizeSelect && sizeSelect.value) || "2x3";
-  }
-
-  if (mode === "circle") {
-    batchData.circleDiameter =
-      parseFloat(circleDiameter?.value) || 4;
+      sizeSelect
+        ? sizeSelect.value
+        : "2x3";
   }
 
   batches.push(batchData);
 
   refreshBatchList();
-}document.addEventListener("paste", async (e) => {
-  if (!e.clipboardData) return;
 
-  const items = e.clipboardData.items;
-  const collected = [];
-  
-
-  for (let item of items) {
-    if (item.type &&
-        item.type.indexOf("image") !== -1) {
-      collected.push(item.getAsFile());
-    }
+  try {
+    await autoPreview();
+  } catch (err) {
+    console.error(
+      "Gagal update preview:",
+      err
+    );
   }
-
-  if (!collected.length) return;
-
-  await addFilesToBatch(collected);
-  await autoPreview();
-  await updatePricePreview();
-});
+}
+    
+    /* upload input */
+    if (upload) upload.onchange = async e => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      await addFilesToBatch(files);
+      upload.value = '';
+      refreshBatchList();
+      await updatePricePreview();
+      await autoPreview();
+    };
+    
+    /* paste (ctrl+v) support */
+    document.addEventListener("paste", async (e) => {
+      if (!e.clipboardData) return;
+      const items = e.clipboardData.items;
+      const collected = [];
+      for (let item of items) {
+        if (item.type && item.type.indexOf("image") !== -1) {
+          collected.push(item.getAsFile());
+        }
+      }
+      if (!collected.length) return;
+      await addFilesToBatch(collected);
+      await autoPreview();
+      await updatePricePreview();
+    });
+    
     /* ---------------------------
         Batch list UI
         --------------------------- */
@@ -530,183 +431,130 @@ async function addFilesToBatch(files) {
       ctxLocal.arc(cx, cy, radius - 1, 0, Math.PI * 2); ctxLocal.stroke();
     }
     
-   /* ---------------------------
-   Build placements for pages
-   Footer hanya halaman 1
-   Halaman 2+ full foto
---------------------------- */
-async function buildPlacementsForPages() {
-  placementsByPage = [];
+    /* ---------------------------
+        Build placements for pages (supports mixed modes)
+        --------------------------- */
+        async function buildPlacementsForPages() {
+          placementsByPage = [];
+        
+          const fullW = 2480;
+          const fullH = 3508;
+          const pxPerCm = PX_PER_CM;
 
-  const fullW = 2480;
-  const fullH = 3508;
-  const pxPerCm = PX_PER_CM;
+          // tinggi footer aman
+          const footerHeight = 160;
 
-  // tinggi footer khusus page 1
-  const footerHeight = 160;
+          // batas bawah area foto
+          const printableBottom = fullH - footerHeight;
+        
+          const mt = (parseFloat(marginTop.value) || 0) / 10 * pxPerCm;
+          const mb = (parseFloat(marginBottom.value) || 0) / 10 * pxPerCm;
+          const ml = (parseFloat(marginLeft.value) || 0) / 10 * pxPerCm;
+          const mr = (parseFloat(marginRight.value) || 0) / 10 * pxPerCm;
+        
+          const gap = Math.max(0, parseInt(gapInput?.value || 10));
+        
+          let pageIdx = 0;
+          placementsByPage[0] = [];
+          
+        
+          let x = ml;
+          let y = mt;
+          let rowMaxH = 0;
+          
+        
+          for (const batch of batches) {
+            const mode = batch.mode || "normal";
+        
+            if (mode === "circle") {
+              const diameterCm = batch.circleDiameter || 4;
+              const diameterPx = diameterCm * pxPerCm;
+        
+              for (const file of batch.files) {
+                const imgObj = await loadImageWithEXIF(file, "preview");
+                if (!imgObj) continue;
+        
+                if (x + diameterPx > fullW - mr) {
+                  x = ml;
+                  y += rowMaxH + gap;
+                  rowMaxH = 0;
+                }
+        
+                if (y + diameterPx > printableBottom - mb) {
+                  pageIdx++;
+                  placementsByPage[pageIdx] = [];
+                  x = ml;
+                  y = mt;
+                  rowMaxH = 0;
+                }
+        
+                placementsByPage[pageIdx].push({
+                  file,
+                  imgObj,
+                  x,
+                  y,
+                  diameterPx,
+                  isCircle: true
+                });
+        
+                rowMaxH = Math.max(rowMaxH, diameterPx);
+                x += diameterPx + gap;
+              }
+        
+            } else {
+        
+              let wcm, hcm;
+        
+              if (batch.size === "custom") {
+                wcm = batch.customW;
+                hcm = batch.customH;
+              } else {
+                [wcm, hcm] = batch.size.split("x").map(Number);
+              }
+        
+              const boxW = wcm * pxPerCm;
+              const boxH = hcm * pxPerCm;
+        
+              for (const file of batch.files) {
+                const imgObj = await loadImageWithEXIF(file, "preview");
+                if (!imgObj) continue;
+        
+                if (x + boxW > fullW - mr) {
+                  x = ml;
+                  y += rowMaxH + gap;
+                  rowMaxH = 0;
+                }
+        
+                let bottomLimit =
+  pageIdx === 0
+    ? fullH - mb - footerHeight
+    : fullH - mb;
 
-  const mt = (parseFloat(marginTop.value) || 0) / 10 * pxPerCm;
-  const mb = (parseFloat(marginBottom.value) || 0) / 10 * pxPerCm;
-  const ml = (parseFloat(marginLeft.value) || 0) / 10 * pxPerCm;
-  const mr = (parseFloat(marginRight.value) || 0) / 10 * pxPerCm;
-
-  const gap = Math.max(
-    0,
-    parseInt(gapInput?.value || 10)
-  );
-
-  let pageIdx = 0;
-  placementsByPage[0] = [];
-
-  let x = ml;
-  let y = mt;
-  let rowMaxH = 0;
-
-  // helper batas bawah tiap halaman
-  function getBottomLimit() {
-    return pageIdx === 0
-      ? fullH - mb - footerHeight
-      : fullH - mb;
-  }
-
- 
-
-    /* ======================
-       MODE CIRCLE
-    ====================== */
-    if (mode === "circle") {
-      const diameterCm = batch.circleDiameter || 4;
-      const diameterPx = diameterCm * pxPerCm;
-    
-      const copies = Math.max(1, batch.copy || 1);
-    
-      for (let c = 0; c < copies; c++) {
-        for (const file of batch.files) {
-    
-          const imgObj =
-            await loadImageWithEXIF(file, "preview");
-    
-          if (!imgObj) continue;
-    
-          if (x + diameterPx > fullW - mr) {
-            x = ml;
-            y += rowMaxH + gap;
-            rowMaxH = 0;
-          }
-    
-          if (y + diameterPx > getBottomLimit()) {
-            pageIdx++;
-            placementsByPage[pageIdx] = [];
-            x = ml;
-            y = mt;
-            rowMaxH = 0;
-          }
-    
-          placementsByPage[pageIdx].push({
-            file,
-            imgObj,
-            x,
-            y,
-            diameterPx,
-            isCircle: true
-          });
-    
-          rowMaxH = Math.max(rowMaxH, diameterPx);
-          x += diameterPx + gap;
-        }
-      }
-    }
-
-    /* ===============================
-   GANTI SELURUH BLOK RECTANGLE
-   di function buildPlacementsForPages()
-   Cari: else {
-   Tempel full ini
-================================= */
-
-else {
-  let wcm, hcm;
-
-  // ukuran custom / preset
-  if (batch.size === "custom") {
-    wcm = parseFloat(batch.customW) || 2;
-    hcm = parseFloat(batch.customH) || 3;
-  } else {
-    [wcm, hcm] = (batch.size || "2x3")
-      .split("x")
-      .map(Number);
-  }
-
-  const boxW = wcm * pxPerCm;
-  const boxH = hcm * pxPerCm;
-
-  // jumlah copy
-  const copies = Math.max(1, batch.copy || 1);
-
-  for (let c = 0; c < copies; c++) {
-    for (const file of batch.files) {
-
-      const imgObj =
-        await loadImageWithEXIF(
-          file,
-          "preview"
-        );
-
-      if (!imgObj) continue;
-
-      /* ------------------
-         pindah baris
-      ------------------ */
-      if (x + boxW > fullW - mr) {
-        x = ml;
-        y += rowMaxH + gap;
-        rowMaxH = 0;
-      }
-
-      /* ------------------
-         pindah halaman
-      ------------------ */
-      if (
-        y + boxH >
-        getBottomLimit()
-      ) {
-        pageIdx++;
-        placementsByPage[pageIdx] = [];
-
-        x = ml;
-        y = mt;
-        rowMaxH = 0;
-      }
-
-      /* ------------------
-         simpan placement
-      ------------------ */
-      placementsByPage[pageIdx].push({
-        file,
-        imgObj,
-        x,
-        y,
-        boxW,
-        boxH,
-        isRectangle: true,
-        offsetX: 0,
-        offsetY: 0,
-        scale: 1
-      });
-
-      /* ------------------
-         update posisi
-      ------------------ */
-      rowMaxH = Math.max(
-        rowMaxH,
-        boxH
-      );
-
-      x += boxW + gap;
-    }
-  }
+if (y + boxH > bottomLimit) {
+  pageIdx++;
+  placementsByPage[pageIdx] = [];
+  x = ml;
+  y = mt;
+  rowMaxH = 0;
 }
-
+        
+                placementsByPage[pageIdx].push({
+                  file,
+                  imgObj,
+                  x,
+                  y,
+                  boxW,
+                  boxH,
+                  isRectangle: true
+                });
+        
+                rowMaxH = Math.max(rowMaxH, boxH);
+                x += boxW + gap;
+              }
+            }
+          }
+        }
+  
     
     /* ---------------------------
         Render preview page (scaled)
@@ -758,143 +606,38 @@ else {
     }
     
     /* ---------------------------
-   Render all pages full-res for PDF
-   Footer hanya halaman 1
-   Halaman 2+ full foto
---------------------------- */
-async function renderAllPagesToCanvases() {
-  const fullW = 2480;
-  const fullH = 3508;
-  const pxPerCm = PX_PER_CM;
-
-  const mt = (parseFloat(marginTop.value) || 0) / 10 * pxPerCm;
-  const mb = (parseFloat(marginBottom.value) || 0) / 10 * pxPerCm;
-  const ml = (parseFloat(marginLeft.value) || 0) / 10 * pxPerCm;
-  const mr = (parseFloat(marginRight.value) || 0) / 10 * pxPerCm;
-
-  // samakan dengan buildPlacements
-  const footerHeight = 160;
-
-  const pages = [];
-  const usedHeightPerPagePx = [];
-
-  for (
-    let pi = 0;
-    pi < (placementsByPage.length || 0);
-    pi++
-  ) {
-    const pagePlacements =
-      placementsByPage[pi] || [];
-
-    const pageCanvas =
-      document.createElement("canvas");
-
-    pageCanvas.width = fullW;
-    pageCanvas.height = fullH;
-
-    const pctx =
-      pageCanvas.getContext("2d");
-
-    // background putih
-    pctx.fillStyle = "#fff";
-    pctx.fillRect(
-      0,
-      0,
-      fullW,
-      fullH
-    );
-
-    // batas tinggi terpakai
-    let usedY = mt;
-
-    // page 1 ada footer zone
-    // page 2+ full bawah
-    const bottomLimit =
-      pi === 0
-        ? fullH - mb - footerHeight
-        : fullH - mb;
-
-    for (const pl of pagePlacements) {
-      const imgHigh =
-        await loadImageWithEXIF(
-          pl.file,
-          "pdf"
-        );
-
-      if (!imgHigh) continue;
-
-      const placementHigh =
-        Object.assign({}, pl);
-
-      placementHigh.imgObj = imgHigh;
-
-      /* ======================
-         RECTANGLE
-      ====================== */
-      if (pl.isRectangle) {
-        drawImageCover(
-          pctx,
-          imgHigh,
-          pl.x,
-          pl.y,
-          pl.boxW,
-          pl.boxH,
-          pl.offsetX || 0,
-          pl.offsetY || 0,
-          pl.scale || 1,
-          true
-        );
-
-        pctx.strokeStyle = "#000";
-        pctx.lineWidth = 2;
-
-        pctx.strokeRect(
-          pl.x,
-          pl.y,
-          pl.boxW,
-          pl.boxH
-        );
-
-        usedY = Math.max(
-          usedY,
-          pl.y + pl.boxH
-        );
+        Render all pages full-res for PDF
+        --------------------------- */
+    async function renderAllPagesToCanvases() {
+      const fullW = 2480, fullH = 3508;
+      const pxPerCm = PX_PER_CM;
+      const mt = (parseFloat(marginTop.value) || 0) / 10 * pxPerCm;
+      const mb = (parseFloat(marginBottom.value) || 0) / 10 * pxPerCm;
+      const ml = (parseFloat(marginLeft.value) || 0) / 10 * pxPerCm;
+      const mr = (parseFloat(marginRight.value) || 0) / 10 * pxPerCm;
+      const pages = []; const usedHeightPerPagePx = [];
+      for (let pi = 0; pi < (placementsByPage.length || 0); pi++) {
+        const pagePlacements = placementsByPage[pi] || [];
+        const pageCanvas = document.createElement('canvas'); pageCanvas.width = fullW; pageCanvas.height = fullH;
+        const pctx = pageCanvas.getContext('2d'); pctx.fillStyle = '#fff'; pctx.fillRect(0, 0, fullW, fullH);
+        let usedY = mt;
+        for (const pl of pagePlacements) {
+          const imgHigh = await loadImageWithEXIF(pl.file, 'pdf'); if (!imgHigh) continue;
+          const placementHigh = Object.assign({}, pl); placementHigh.imgObj = imgHigh;
+          if (pl.isRectangle) {
+            drawImageCover(pctx, imgHigh, pl.x, pl.y, pl.boxW, pl.boxH, pl.offsetX, pl.offsetY, pl.scale, true);
+            pctx.strokeStyle = '#000'; pctx.lineWidth = 2; pctx.strokeRect(pl.x, pl.y, pl.boxW, pl.boxH);
+            usedY = Math.max(usedY, pl.y + (pl.boxH || 0));
+          } else {
+            drawCirclePlacement(pctx, placementHigh);
+            usedY = Math.max(usedY, pl.y + pl.diameterPx);
+          }
+        }
+        usedHeightPerPagePx.push(usedY);
+        pages.push(pageCanvas);
       }
-
-      /* ======================
-         CIRCLE
-      ====================== */
-      else if (pl.isCircle) {
-        drawCirclePlacement(
-          pctx,
-          placementHigh
-        );
-
-        usedY = Math.max(
-          usedY,
-          pl.y + pl.diameterPx
-        );
-      }
+      return { pages, usedHeightPerPagePx };
     }
-
-    // jangan lebih dari batas halaman
-    usedY = Math.min(
-      usedY,
-      bottomLimit
-    );
-
-    usedHeightPerPagePx.push(
-      usedY
-    );
-
-    pages.push(pageCanvas);
-  }
-
-  return {
-    pages,
-    usedHeightPerPagePx
-  };
-}
     
     /* ---------------------------
         Pricing helpers
@@ -967,6 +710,20 @@ async function renderAllPagesToCanvases() {
       }
     }
     
+    /* ---------------------------
+   Auto preview (used after changes)
+--------------------------- */
+async function autoPreview() {
+  await buildPlacementsForPages();
+
+  const result = await renderAllPagesToCanvases();
+
+  pagesCache = result.pages || [];
+
+  showPageAtIndex(0);
+
+  await updatePricePreview();
+}
 
 /* ---------------------------
    Preview button
@@ -1429,4 +1186,3 @@ if (nextPageBtn) {
       document.getElementById("marginSection")
         .classList.toggle("show");
     }
-}

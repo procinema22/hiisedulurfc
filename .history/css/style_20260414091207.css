@@ -322,7 +322,3 @@ header {
 .btn-login:hover {
   background: #e6e6e6;
 }
-.right-panel{
-  position:relative;
-  z-index:20;
-}

@@ -312,33 +312,12 @@ async function autoPreview() {
   await buildPlacementsForPages();
 
   const result = await renderAllPagesToCanvases();
+
   pagesCache = result.pages || [];
 
   showPageAtIndex(0);
 
   await updatePricePreview();
-}
-
-async function updatePricePreview() {
-  if (!batches.length) {
-    priceDisplay.textContent = "Harga: Rp 0";
-    return;
-  }
-
-  if (manualHargaCheckbox?.checked) {
-    const val = parseInt(manualHargaInput.value) || 0;
-    priceDisplay.textContent =
-      "Harga: Rp " + val.toLocaleString();
-    return;
-  }
-
-  const result =
-    await computeTotalPriceForPreviewOrGenerate();
-
-  const total = result.grandTotal || 0;
-
-  priceDisplay.textContent =
-    "Harga: Rp " + total.toLocaleString();
 }
 
 async function updatePricePreview() {
@@ -360,16 +339,79 @@ async function updatePricePreview() {
   }
 }
 async function addFilesToBatch(files) {
-  const mode =
-    (modeSelect && modeSelect.value) || "normal";
+  const mode = modeSelect?.value || "normal";
 
   const batchData = {
-    files: files,
+    files,
     copy: 1,
-    mode: mode
+    mode
   };
 
-  if (sizeSelect && sizeSelect.value === "custom") {
+  if (mode === "circle") {
+    batchData.circleDiameter =
+      parseFloat(circleDiameter?.value) || 4;
+  }
+
+  if (sizeSelect?.value === "custom") {
+    batchData.size = "custom";
+    batchData.customW = parseFloat(customW?.value) || 2;
+    batchData.customH = parseFloat(customH?.value) || 3;
+  } else {
+    batchData.size = sizeSelect?.value || "2x3";
+  }
+
+  batches.push(batchData);
+
+  refreshBatchList();
+  await autoPreview();
+}
+
+  /* ukuran lingkaran disimpan per batch */
+  if (mode === "circle") {
+    const diameterCm = batch.circleDiameter || 4;
+    const diameterPx = diameterCm * pxPerCm;
+  
+    const copies = Math.max(1, batch.copy || 1);
+  
+    for (let c = 0; c < copies; c++) {
+      for (const file of batch.files) {
+  
+        const imgObj = await loadImageWithEXIF(file, "preview");
+        if (!imgObj) continue;
+  
+        if (x + diameterPx > fullW - mr) {
+          x = ml;
+          y += rowMaxH + gap;
+          rowMaxH = 0;
+        }
+  
+        if (y + diameterPx > getBottomLimit()) {
+          pageIdx++;
+          placementsByPage[pageIdx] = [];
+          x = ml;
+          y = mt;
+          rowMaxH = 0;
+        }
+  
+        placementsByPage[pageIdx].push({
+          file,
+          imgObj,
+          x,
+          y,
+          diameterPx,
+          isCircle: true
+        });
+  
+        rowMaxH = Math.max(rowMaxH, diameterPx);
+        x += diameterPx + gap;
+      }
+    }
+  }
+  /* ukuran custom */
+  if (
+    sizeSelect &&
+    sizeSelect.value === "custom"
+  ) {
     batchData.size = "custom";
     batchData.customW =
       parseFloat(customW?.value) || 2;
@@ -377,37 +419,52 @@ async function addFilesToBatch(files) {
       parseFloat(customH?.value) || 3;
   } else {
     batchData.size =
-      (sizeSelect && sizeSelect.value) || "2x3";
-  }
-
-  if (mode === "circle") {
-    batchData.circleDiameter =
-      parseFloat(circleDiameter?.value) || 4;
+      sizeSelect
+        ? sizeSelect.value
+        : "2x3";
   }
 
   batches.push(batchData);
 
   refreshBatchList();
-}document.addEventListener("paste", async (e) => {
-  if (!e.clipboardData) return;
 
-  const items = e.clipboardData.items;
-  const collected = [];
-  
-
-  for (let item of items) {
-    if (item.type &&
-        item.type.indexOf("image") !== -1) {
-      collected.push(item.getAsFile());
-    }
+  try {
+    await autoPreview();
+  } catch (err) {
+    console.error(
+      "Gagal update preview:",
+      err
+    );
   }
 
-  if (!collected.length) return;
-
-  await addFilesToBatch(collected);
-  await autoPreview();
-  await updatePricePreview();
-});
+    
+    /* upload input */
+    if (upload) upload.onchange = async e => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      await addFilesToBatch(files);
+      upload.value = '';
+      refreshBatchList();
+      await updatePricePreview();
+      await autoPreview();
+    };
+    
+    /* paste (ctrl+v) support */
+    document.addEventListener("paste", async (e) => {
+      if (!e.clipboardData) return;
+      const items = e.clipboardData.items;
+      const collected = [];
+      for (let item of items) {
+        if (item.type && item.type.indexOf("image") !== -1) {
+          collected.push(item.getAsFile());
+        }
+      }
+      if (!collected.length) return;
+      await addFilesToBatch(collected);
+      await autoPreview();
+      await updatePricePreview();
+    });
+    
     /* ---------------------------
         Batch list UI
         --------------------------- */
@@ -569,144 +626,139 @@ async function buildPlacementsForPages() {
       : fullH - mb;
   }
 
- 
+  for (const batch of batches) {
+    const mode = batch.mode || "normal";
 
     /* ======================
        MODE CIRCLE
     ====================== */
     if (mode === "circle") {
-      const diameterCm = batch.circleDiameter || 4;
-      const diameterPx = diameterCm * pxPerCm;
-    
-      const copies = Math.max(1, batch.copy || 1);
-    
-      for (let c = 0; c < copies; c++) {
-        for (const file of batch.files) {
-    
-          const imgObj =
-            await loadImageWithEXIF(file, "preview");
-    
-          if (!imgObj) continue;
-    
-          if (x + diameterPx > fullW - mr) {
-            x = ml;
-            y += rowMaxH + gap;
-            rowMaxH = 0;
+      const diameterCm =
+        batch.circleDiameter || 4;
+
+      const diameterPx =
+        diameterCm * pxPerCm;
+
+        for (let c = 0; c < batch.copy; c++) {
+          for (const file of batch.files) {
+        
+            const imgObj =
+              await loadImageWithEXIF(
+                file,
+                "preview"
+              );
           }
-    
-          if (y + diameterPx > getBottomLimit()) {
-            pageIdx++;
-            placementsByPage[pageIdx] = [];
-            x = ml;
-            y = mt;
-            rowMaxH = 0;
-          }
-    
-          placementsByPage[pageIdx].push({
-            file,
-            imgObj,
-            x,
-            y,
-            diameterPx,
-            isCircle: true
-          });
-    
-          rowMaxH = Math.max(rowMaxH, diameterPx);
-          x += diameterPx + gap;
+          
+
+        if (!imgObj) continue;
+
+        // pindah baris jika kanan habis
+        if (x + diameterPx > fullW - mr) {
+          x = ml;
+          y += rowMaxH + gap;
+          rowMaxH = 0;
         }
+
+        // pindah halaman jika bawah habis
+        if (
+          y + diameterPx >
+          getBottomLimit()
+        ) {
+          pageIdx++;
+          placementsByPage[pageIdx] = [];
+
+          x = ml;
+          y = mt;
+          rowMaxH = 0;
+        }
+
+        placementsByPage[pageIdx].push({
+          file,
+          imgObj,
+          x,
+          y,
+          diameterPx,
+          isCircle: true
+        });
+
+        rowMaxH = Math.max(
+          rowMaxH,
+          diameterPx
+        );
+
+        x += diameterPx + gap;
       }
     }
 
-    /* ===============================
-   GANTI SELURUH BLOK RECTANGLE
-   di function buildPlacementsForPages()
-   Cari: else {
-   Tempel full ini
-================================= */
+    /* ======================
+       MODE RECTANGLE
+    ====================== */
+    else {
+      let wcm, hcm;
 
-else {
-  let wcm, hcm;
+      if (batch.size === "custom") {
+        wcm = batch.customW;
+        hcm = batch.customH;
+      } else {
+        [wcm, hcm] =
+          batch.size
+            .split("x")
+            .map(Number);
+      }
 
-  // ukuran custom / preset
-  if (batch.size === "custom") {
-    wcm = parseFloat(batch.customW) || 2;
-    hcm = parseFloat(batch.customH) || 3;
-  } else {
-    [wcm, hcm] = (batch.size || "2x3")
-      .split("x")
-      .map(Number);
-  }
+      const boxW = wcm * pxPerCm;
+      const boxH = hcm * pxPerCm;
+      const copies = Math.max(1, batch.copy || 1);
 
-  const boxW = wcm * pxPerCm;
-  const boxH = hcm * pxPerCm;
+      for (let c = 0; c < copies; c++) {
+        for (const file of batch.files) {
+      
+          const imgObj = await loadImageWithEXIF(file,"preview");
+          if (!imgObj) continue;
+        }
+      
+          // lanjut layout
 
-  // jumlah copy
-  const copies = Math.max(1, batch.copy || 1);
+        // pindah baris jika kanan habis
+        if (x + boxW > fullW - mr) {
+          x = ml;
+          y += rowMaxH + gap;
+          rowMaxH = 0;
+        }
 
-  for (let c = 0; c < copies; c++) {
-    for (const file of batch.files) {
+        // pindah halaman jika bawah habis
+        if (
+          y + boxH >
+          getBottomLimit()
+        ) {
+          pageIdx++;
+          placementsByPage[pageIdx] = [];
 
-      const imgObj =
-        await loadImageWithEXIF(
+          x = ml;
+          y = mt;
+          rowMaxH = 0;
+        }
+
+        placementsByPage[pageIdx].push({
           file,
-          "preview"
+          imgObj,
+          x,
+          y,
+          boxW,
+          boxH,
+          isRectangle: true
+        });
+
+        rowMaxH = Math.max(
+          rowMaxH,
+          boxH
         );
 
-      if (!imgObj) continue;
-
-      /* ------------------
-         pindah baris
-      ------------------ */
-      if (x + boxW > fullW - mr) {
-        x = ml;
-        y += rowMaxH + gap;
-        rowMaxH = 0;
+        x += boxW + gap;
       }
-
-      /* ------------------
-         pindah halaman
-      ------------------ */
-      if (
-        y + boxH >
-        getBottomLimit()
-      ) {
-        pageIdx++;
-        placementsByPage[pageIdx] = [];
-
-        x = ml;
-        y = mt;
-        rowMaxH = 0;
-      }
-
-      /* ------------------
-         simpan placement
-      ------------------ */
-      placementsByPage[pageIdx].push({
-        file,
-        imgObj,
-        x,
-        y,
-        boxW,
-        boxH,
-        isRectangle: true,
-        offsetX: 0,
-        offsetY: 0,
-        scale: 1
-      });
-
-      /* ------------------
-         update posisi
-      ------------------ */
-      rowMaxH = Math.max(
-        rowMaxH,
-        boxH
-      );
-
-      x += boxW + gap;
     }
   }
 }
-
     
     /* ---------------------------
         Render preview page (scaled)
@@ -967,6 +1019,20 @@ async function renderAllPagesToCanvases() {
       }
     }
     
+    /* ---------------------------
+   Auto preview (used after changes)
+--------------------------- */
+async function autoPreview() {
+  await buildPlacementsForPages();
+
+  const result = await renderAllPagesToCanvases();
+
+  pagesCache = result.pages || [];
+
+  showPageAtIndex(0);
+
+  await updatePricePreview();
+}
 
 /* ---------------------------
    Preview button
@@ -1429,4 +1495,3 @@ if (nextPageBtn) {
       document.getElementById("marginSection")
         .classList.toggle("show");
     }
-}

@@ -369,6 +369,7 @@ async function addFilesToBatch(files) {
     mode: mode
   };
 
+  // ukuran foto
   if (sizeSelect && sizeSelect.value === "custom") {
     batchData.size = "custom";
     batchData.customW =
@@ -380,34 +381,35 @@ async function addFilesToBatch(files) {
       (sizeSelect && sizeSelect.value) || "2x3";
   }
 
+  // mode lingkaran
   if (mode === "circle") {
     batchData.circleDiameter =
       parseFloat(circleDiameter?.value) || 4;
   }
 
+  // simpan batch
   batches.push(batchData);
 
+  // refresh UI
   refreshBatchList();
-}document.addEventListener("paste", async (e) => {
-  if (!e.clipboardData) return;
 
-  const items = e.clipboardData.items;
-  const collected = [];
-  
-
-  for (let item of items) {
-    if (item.type &&
-        item.type.indexOf("image") !== -1) {
-      collected.push(item.getAsFile());
-    }
-  }
-
-  if (!collected.length) return;
-
-  await addFilesToBatch(collected);
-  await autoPreview();
-  await updatePricePreview();
-});
+    
+    /* paste (ctrl+v) support */
+    document.addEventListener("paste", async (e) => {
+      if (!e.clipboardData) return;
+      const items = e.clipboardData.items;
+      const collected = [];
+      for (let item of items) {
+        if (item.type && item.type.indexOf("image") !== -1) {
+          collected.push(item.getAsFile());
+        }
+      }
+      if (!collected.length) return;
+      await addFilesToBatch(collected);
+      await autoPreview();
+      await updatePricePreview();
+    });
+    
     /* ---------------------------
         Batch list UI
         --------------------------- */
@@ -569,7 +571,8 @@ async function buildPlacementsForPages() {
       : fullH - mb;
   }
 
- 
+  for (const batch of batches) {
+    const mode = batch.mode || "normal";
 
     /* ======================
        MODE CIRCLE
@@ -617,95 +620,80 @@ async function buildPlacementsForPages() {
       }
     }
 
-    /* ===============================
-   GANTI SELURUH BLOK RECTANGLE
-   di function buildPlacementsForPages()
-   Cari: else {
-   Tempel full ini
-================================= */
+    /* ======================
+       MODE RECTANGLE
+    ====================== */
+    else {
+      let wcm, hcm;
 
-else {
-  let wcm, hcm;
-
-  // ukuran custom / preset
-  if (batch.size === "custom") {
-    wcm = parseFloat(batch.customW) || 2;
-    hcm = parseFloat(batch.customH) || 3;
-  } else {
-    [wcm, hcm] = (batch.size || "2x3")
-      .split("x")
-      .map(Number);
-  }
-
-  const boxW = wcm * pxPerCm;
-  const boxH = hcm * pxPerCm;
-
-  // jumlah copy
-  const copies = Math.max(1, batch.copy || 1);
-
-  for (let c = 0; c < copies; c++) {
-    for (const file of batch.files) {
-
-      const imgObj =
-        await loadImageWithEXIF(
-          file,
-          "preview"
-        );
-
-      if (!imgObj) continue;
-
-      /* ------------------
-         pindah baris
-      ------------------ */
-      if (x + boxW > fullW - mr) {
-        x = ml;
-        y += rowMaxH + gap;
-        rowMaxH = 0;
+      if (batch.size === "custom") {
+        wcm = batch.customW;
+        hcm = batch.customH;
+      } else {
+        [wcm, hcm] =
+          batch.size
+            .split("x")
+            .map(Number);
       }
 
-      /* ------------------
-         pindah halaman
-      ------------------ */
-      if (
-        y + boxH >
-        getBottomLimit()
-      ) {
-        pageIdx++;
-        placementsByPage[pageIdx] = [];
+      const boxW = wcm * pxPerCm;
+      const boxH = hcm * pxPerCm;
 
-        x = ml;
-        y = mt;
-        rowMaxH = 0;
-      }
+      const copies = Math.max(1, batch.copy || 1);
 
-      /* ------------------
-         simpan placement
-      ------------------ */
-      placementsByPage[pageIdx].push({
+for (let c = 0; c < copies; c++) {
+  for (const file of batch.files) {
+
+    const imgObj =
+      await loadImageWithEXIF(
         file,
-        imgObj,
-        x,
-        y,
-        boxW,
-        boxH,
-        isRectangle: true,
-        offsetX: 0,
-        offsetY: 0,
-        scale: 1
-      });
-
-      /* ------------------
-         update posisi
-      ------------------ */
-      rowMaxH = Math.max(
-        rowMaxH,
-        boxH
+        "preview"
       );
 
-      x += boxW + gap;
+    if (!imgObj) continue;
+    x += boxW + gap;
     }
   }
-}
+
+        // pindah baris jika kanan habis
+        if (x + boxW > fullW - mr) {
+          x = ml;
+          y += rowMaxH + gap;
+          rowMaxH = 0;
+        }
+
+        // pindah halaman jika bawah habis
+        if (
+          y + boxH >
+          getBottomLimit()
+        ) {
+          pageIdx++;
+          placementsByPage[pageIdx] = [];
+
+          x = ml;
+          y = mt;
+          rowMaxH = 0;
+        }
+
+        placementsByPage[pageIdx].push({
+          file,
+          imgObj,
+          x,
+          y,
+          boxW,
+          boxH,
+          isRectangle: true
+        });
+
+        rowMaxH = Math.max(
+          rowMaxH,
+          boxH
+        );
+
+        x += boxW + gap;
+      }
+    }
+  }
 
     
     /* ---------------------------
@@ -1429,4 +1417,4 @@ if (nextPageBtn) {
       document.getElementById("marginSection")
         .classList.toggle("show");
     }
-}
+  }
