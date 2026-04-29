@@ -1,9 +1,8 @@
 /* =====================================
    FILE: js/events.js
-   FINAL PRODUCTION VERSION
-   UI Events + Drag + Zoom + Popup
+   FINAL MODULE VERSION
+   UI Events + Drag + Zoom
 ===================================== */
-
 console.log("EVENTS FINAL LOADED");
 
 import {
@@ -69,9 +68,7 @@ window.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    /* ---------------------------
-       MANUAL HARGA
-    --------------------------- */
+    /* manual harga */
     manualHargaCheckbox?.addEventListener(
       "change",
       () => {
@@ -118,9 +115,7 @@ window.addEventListener(
       }
     );
 
-    /* ---------------------------
-       PREVIEW
-    --------------------------- */
+    /* preview */
     previewBtn?.addEventListener(
       "click",
       async () => {
@@ -160,9 +155,7 @@ window.addEventListener(
       }
     );
 
-    /* ---------------------------
-       GENERATE
-    --------------------------- */
+    /* generate */
     generateBtn?.addEventListener(
       "click",
       async () => {
@@ -187,8 +180,6 @@ window.addEventListener(
 
         } catch (err) {
 
-          console.error(err);
-
           toast(
             "Generate gagal"
           );
@@ -202,48 +193,21 @@ window.addEventListener(
       }
     );
 
-   /* ---------------------------
-   PDF
---------------------------- */
-downloadPdf?.addEventListener(
-  "click",
-  async () => {
+    /* pdf */
+    downloadPdf?.addEventListener(
+      "click",
+      async () => {
 
-    if (!state.batches.length) {
-      toast("Belum ada foto");
-      return;
-    }
+        await openPdfFile();
 
-    if (!cekNamaPelanggan())
-      return;
+      }
+    );
 
-    showLoading();
-
-    try {
-
-      await openPdfFile();
-
-      toast("PDF berhasil dibuat");
-
-    } catch (err) {
-
-      console.error(err);
-
-      toast("Gagal membuka PDF");
-
-    } finally {
-
-      hideLoading();
-
-    }
-
-  }
-);
-    /* ---------------------------
-       RESET
-    --------------------------- */
+    /* reset */
     document
-      .getElementById("reset")
+      .getElementById(
+        "reset"
+      )
       ?.addEventListener(
         "click",
         () => {
@@ -272,9 +236,7 @@ downloadPdf?.addEventListener(
         }
       );
 
-    /* ---------------------------
-       PAGE NAV
-    --------------------------- */
+    /* page nav */
     prevPageBtn?.addEventListener(
       "click",
       () => {
@@ -297,9 +259,7 @@ downloadPdf?.addEventListener(
       }
     );
 
-    /* ---------------------------
-       MODE CHANGE
-    --------------------------- */
+    /* mode change */
     modeSelect?.addEventListener(
       "change",
       async () => {
@@ -331,9 +291,7 @@ downloadPdf?.addEventListener(
       }
     );
 
-    /* ---------------------------
-       SIZE CHANGE
-    --------------------------- */
+    /* size change */
     sizeSelect?.addEventListener(
       "change",
       async () => {
@@ -357,9 +315,7 @@ downloadPdf?.addEventListener(
       }
     );
 
-    /* ---------------------------
-       LIVE UPDATE
-    --------------------------- */
+    /* live update */
     [
       marginTop,
       marginBottom,
@@ -635,9 +591,9 @@ canvas?.addEventListener(
 );
 
 /* =====================================
-   POPUP GLOBAL
+   POPUP
 ===================================== */
-window.showPopup = function(
+function showPopup(
   msg = "Notifikasi"
 ) {
 
@@ -677,7 +633,7 @@ window.showPopup = function(
       2200
     );
 
-};
+}
 
 /* =====================================
    VALIDASI NAMA

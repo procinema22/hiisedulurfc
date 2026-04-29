@@ -202,43 +202,18 @@ window.addEventListener(
       }
     );
 
-   /* ---------------------------
-   PDF
---------------------------- */
-downloadPdf?.addEventListener(
-  "click",
-  async () => {
+    /* ---------------------------
+       PDF
+    --------------------------- */
+    downloadPdf?.addEventListener(
+      "click",
+      async () => {
 
-    if (!state.batches.length) {
-      toast("Belum ada foto");
-      return;
-    }
+        await openPdfFile();
 
-    if (!cekNamaPelanggan())
-      return;
+      }
+    );
 
-    showLoading();
-
-    try {
-
-      await openPdfFile();
-
-      toast("PDF berhasil dibuat");
-
-    } catch (err) {
-
-      console.error(err);
-
-      toast("Gagal membuka PDF");
-
-    } finally {
-
-      hideLoading();
-
-    }
-
-  }
-);
     /* ---------------------------
        RESET
     --------------------------- */

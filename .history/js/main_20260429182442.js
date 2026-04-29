@@ -22,12 +22,12 @@ export function formatRupiah(
   value
 ) {
 
-  const angka =
+  const n =
     parseInt(value) || 0;
 
   return (
     "Rp " +
-    angka.toLocaleString(
+    n.toLocaleString(
       "id-ID"
     )
   );
@@ -71,7 +71,7 @@ export function clamp(
 }
 
 /* =====================================
-   WAIT
+   DELAY
 ===================================== */
 export function wait(
   ms = 200
@@ -110,11 +110,9 @@ export function toast(
   );
 
   setTimeout(() => {
-
     el.classList.remove(
       "show"
     );
-
   }, 2200);
 
 }
@@ -292,7 +290,7 @@ export function getMarginsPx() {
 }
 
 /* =====================================
-   GET GAP
+   GAP PX
 ===================================== */
 export function getGap() {
 

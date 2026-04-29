@@ -1,6 +1,5 @@
 /* =====================================
    FILE: js/render.js
-   FINAL MODULE VERSION
    Preview Canvas / Multi Page
 ===================================== */
 
@@ -20,9 +19,9 @@ import {
   clamp
 } from "./helpers.js";
 
-/* =====================================
-   DRAW RECTANGLE COVER
-===================================== */
+/* ---------------------------
+   Draw Rectangle Cover
+--------------------------- */
 export function drawImageCover(
   ctxLocal,
   img,
@@ -32,14 +31,10 @@ export function drawImageCover(
   boxH,
   offsetX = 0,
   offsetY = 0,
-  scaleZoom = 1
+  zoom = 1
 ) {
-
-  const iw =
-    img.width;
-
-  const ih =
-    img.height;
+  const iw = img.width;
+  const ih = img.height;
 
   const baseScale =
     Math.max(
@@ -47,15 +42,14 @@ export function drawImageCover(
       boxH / ih
     );
 
-  const scale =
-    baseScale *
-    scaleZoom;
+  const finalScale =
+    baseScale * zoom;
 
   const drawW =
-    iw * scale;
+    iw * finalScale;
 
   const drawH =
-    ih * scale;
+    ih * finalScale;
 
   const dx =
     x +
@@ -76,7 +70,6 @@ export function drawImageCover(
     boxW,
     boxH
   );
-
   ctxLocal.clip();
 
   ctxLocal.drawImage(
@@ -100,12 +93,11 @@ export function drawImageCover(
     boxW,
     boxH
   );
-
 }
 
-/* =====================================
-   DRAW CIRCLE
-===================================== */
+/* ---------------------------
+   Draw Circle
+--------------------------- */
 export function drawCircle(
   ctxLocal,
   img,
@@ -114,23 +106,14 @@ export function drawCircle(
   diameter,
   offsetX = 0,
   offsetY = 0,
-  scaleZoom = 1
+  zoom = 1
 ) {
+  const r = diameter / 2;
+  const cx = x + r;
+  const cy = y + r;
 
-  const r =
-    diameter / 2;
-
-  const cx =
-    x + r;
-
-  const cy =
-    y + r;
-
-  const iw =
-    img.width;
-
-  const ih =
-    img.height;
+  const iw = img.width;
+  const ih = img.height;
 
   const baseScale =
     Math.max(
@@ -138,30 +121,24 @@ export function drawCircle(
       diameter / ih
     );
 
-  const scale =
-    baseScale *
-    scaleZoom;
+  const finalScale =
+    baseScale * zoom;
 
   const drawW =
-    iw * scale;
+    iw * finalScale;
 
   const drawH =
-    ih * scale;
+    ih * finalScale;
 
   const dx =
-    cx -
-    drawW / 2 +
-    offsetX;
+    cx - drawW / 2 + offsetX;
 
   const dy =
-    cy -
-    drawH / 2 +
-    offsetY;
+    cy - drawH / 2 + offsetY;
 
   ctxLocal.save();
 
   ctxLocal.beginPath();
-
   ctxLocal.arc(
     cx,
     cy,
@@ -169,7 +146,6 @@ export function drawCircle(
     0,
     Math.PI * 2
   );
-
   ctxLocal.clip();
 
   ctxLocal.drawImage(
@@ -183,7 +159,6 @@ export function drawCircle(
   ctxLocal.restore();
 
   ctxLocal.beginPath();
-
   ctxLocal.arc(
     cx,
     cy,
@@ -192,15 +167,16 @@ export function drawCircle(
     Math.PI * 2
   );
 
-  ctxLocal.lineWidth = 2;
-  ctxLocal.strokeStyle = "#000";
-  ctxLocal.stroke();
+  ctxLocal.strokeStyle =
+    "#000";
 
+  ctxLocal.lineWidth = 2;
+  ctxLocal.stroke();
 }
 
-/* =====================================
-   RENDER ALL PAGES
-===================================== */
+/* ---------------------------
+   Render Semua Halaman
+--------------------------- */
 export async function renderAllPages() {
 
   state.pagesCache = [];
@@ -211,9 +187,7 @@ export async function renderAllPages() {
   for (const page of state.placementsByPage) {
 
     const pc =
-      document.createElement(
-        "canvas"
-      );
+      document.createElement("canvas");
 
     pc.width =
       fullW *
@@ -243,21 +217,14 @@ export async function renderAllPages() {
         drawImageCover(
           pctx,
           item.imgObj,
-          item.x *
-            PREVIEW_SCALE,
-          item.y *
-            PREVIEW_SCALE,
-          item.boxW *
-            PREVIEW_SCALE,
-          item.boxH *
-            PREVIEW_SCALE,
-          (item.offsetX || 0) *
-            PREVIEW_SCALE,
-          (item.offsetY || 0) *
-            PREVIEW_SCALE,
+          item.x * PREVIEW_SCALE,
+          item.y * PREVIEW_SCALE,
+          item.boxW * PREVIEW_SCALE,
+          item.boxH * PREVIEW_SCALE,
+          (item.offsetX || 0) * PREVIEW_SCALE,
+          (item.offsetY || 0) * PREVIEW_SCALE,
           item.scale || 1
         );
-
       }
 
       else if (item.isCircle) {
@@ -265,10 +232,8 @@ export async function renderAllPages() {
         drawCircle(
           pctx,
           item.imgObj,
-          item.x *
-            PREVIEW_SCALE,
-          item.y *
-            PREVIEW_SCALE,
+          item.x * PREVIEW_SCALE,
+          item.y * PREVIEW_SCALE,
           item.diameterPx *
             PREVIEW_SCALE,
           (item.offsetX || 0) *
@@ -277,31 +242,21 @@ export async function renderAllPages() {
             PREVIEW_SCALE,
           item.scale || 1
         );
-
       }
-
     }
 
-    state.pagesCache.push(
-      pc
-    );
-
+    state.pagesCache.push(pc);
   }
-
 }
 
-/* =====================================
-   SHOW PAGE
-===================================== */
+/* ---------------------------
+   Show Page
+--------------------------- */
 export function showPageAtIndex(i) {
 
-  if (
-    !state.pagesCache.length
-  ) {
-
+  if (!state.pagesCache.length) {
     clearCanvas();
     return;
-
   }
 
   state.currentPageIndex =
@@ -327,12 +282,11 @@ export function showPageAtIndex(i) {
   );
 
   updatePageNav();
-
 }
 
-/* =====================================
-   UPDATE NAVIGATION
-===================================== */
+/* ---------------------------
+   Update Navigation
+--------------------------- */
 export function updatePageNav() {
 
   if (!pageNav) return;
@@ -343,29 +297,22 @@ export function updatePageNav() {
       : "none";
 
   if (pageIndicator) {
-
     pageIndicator.textContent =
       `Halaman ${
         state.currentPageIndex + 1
       } / ${
         state.pagesCache.length
       }`;
-
   }
 
   if (prevPageBtn) {
-
     prevPageBtn.disabled =
       state.currentPageIndex === 0;
-
   }
 
   if (nextPageBtn) {
-
     nextPageBtn.disabled =
       state.currentPageIndex ===
       state.pagesCache.length - 1;
-
   }
-
 }

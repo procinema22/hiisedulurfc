@@ -1,10 +1,9 @@
 /* =====================================
    FILE: js/events.js
-   FINAL PRODUCTION VERSION
-   UI Events + Drag + Zoom + Popup
+   FINAL MODULE VERSION
+   UI Events + Drag + Zoom
 ===================================== */
-
-console.log("EVENTS FINAL LOADED");
+console.log("EVENTS NEW VERSION LOADED");
 
 import {
   upload,
@@ -12,6 +11,7 @@ import {
   previewBtn,
   generateBtn,
   downloadPdf,
+  resetBtn,
   pageNav,
   prevPageBtn,
   nextPageBtn,
@@ -69,9 +69,7 @@ window.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    /* ---------------------------
-       MANUAL HARGA
-    --------------------------- */
+    /* manual price */
     manualHargaCheckbox?.addEventListener(
       "change",
       () => {
@@ -118,20 +116,23 @@ window.addEventListener(
       }
     );
 
-    /* ---------------------------
-       PREVIEW
-    --------------------------- */
+    /* preview */
     previewBtn?.addEventListener(
       "click",
       async () => {
 
-        if (!state.batches.length) {
-          toast("Belum ada foto");
+        if (
+          !state.batches.length
+        ) {
+          toast(
+            "Belum ada foto"
+          );
           return;
         }
 
-        if (!cekNamaPelanggan())
-          return;
+        if (
+          !cekNamaPelanggan()
+        ) return;
 
         showLoading();
 
@@ -145,7 +146,9 @@ window.addEventListener(
 
         } catch (err) {
 
-          console.error(err);
+          console.error(
+            err
+          );
 
           toast(
             "Preview gagal"
@@ -160,20 +163,23 @@ window.addEventListener(
       }
     );
 
-    /* ---------------------------
-       GENERATE
-    --------------------------- */
+    /* generate */
     generateBtn?.addEventListener(
       "click",
       async () => {
 
-        if (!state.batches.length) {
-          toast("Belum ada foto");
+        if (
+          !state.batches.length
+        ) {
+          toast(
+            "Belum ada foto"
+          );
           return;
         }
 
-        if (!cekNamaPelanggan())
-          return;
+        if (
+          !cekNamaPelanggan()
+        ) return;
 
         showLoading();
 
@@ -186,8 +192,6 @@ window.addEventListener(
           );
 
         } catch (err) {
-
-          console.error(err);
 
           toast(
             "Generate gagal"
@@ -202,79 +206,39 @@ window.addEventListener(
       }
     );
 
-   /* ---------------------------
-   PDF
---------------------------- */
-downloadPdf?.addEventListener(
-  "click",
-  async () => {
+    /* pdf */
+    downloadPdf?.addEventListener(
+      "click",
+      async () => {
 
-    if (!state.batches.length) {
-      toast("Belum ada foto");
-      return;
-    }
+        await openPdfFile();
 
-    if (!cekNamaPelanggan())
-      return;
+      }
+    );
 
-    showLoading();
-
-    try {
-
-      await openPdfFile();
-
-      toast("PDF berhasil dibuat");
-
-    } catch (err) {
-
-      console.error(err);
-
-      toast("Gagal membuka PDF");
-
-    } finally {
-
-      hideLoading();
-
-    }
-
-  }
-);
-    /* ---------------------------
-       RESET
-    --------------------------- */
     document
-      .getElementById("reset")
-      ?.addEventListener(
-        "click",
-        () => {
+  .getElementById("reset")
+  ?.addEventListener(
+    "click",
+    () => {
 
-          resetState();
+      resetState();
+      refreshBatchList();
+      clearCanvas();
+      updatePricePreview();
 
-          refreshBatchList();
+      if (pageNav)
+        pageNav.style.display = "none";
 
-          clearCanvas();
+      if (upload)
+        upload.value = "";
 
-          updatePricePreview();
+      toast("Reset selesai");
 
-          if (pageNav) {
-            pageNav.style.display =
-              "none";
-          }
+    }
+  );
 
-          if (upload) {
-            upload.value = "";
-          }
-
-          toast(
-            "Reset selesai"
-          );
-
-        }
-      );
-
-    /* ---------------------------
-       PAGE NAV
-    --------------------------- */
+    /* page nav */
     prevPageBtn?.addEventListener(
       "click",
       () => {
@@ -297,9 +261,7 @@ downloadPdf?.addEventListener(
       }
     );
 
-    /* ---------------------------
-       MODE CHANGE
-    --------------------------- */
+    /* mode change */
     modeSelect?.addEventListener(
       "change",
       async () => {
@@ -331,9 +293,7 @@ downloadPdf?.addEventListener(
       }
     );
 
-    /* ---------------------------
-       SIZE CHANGE
-    --------------------------- */
+    /* size change */
     sizeSelect?.addEventListener(
       "change",
       async () => {
@@ -357,9 +317,7 @@ downloadPdf?.addEventListener(
       }
     );
 
-    /* ---------------------------
-       LIVE UPDATE
-    --------------------------- */
+    /* live preview */
     [
       marginTop,
       marginBottom,
@@ -418,8 +376,9 @@ canvas?.addEventListener(
 
     for (const item of page) {
 
-      /* rectangle */
-      if (item.isRectangle) {
+      if (
+        item.isRectangle
+      ) {
 
         const x =
           item.x *
@@ -442,46 +401,6 @@ canvas?.addEventListener(
           mx <= x + w &&
           my >= y &&
           my <= y + h
-        ) {
-
-          state.selectedPlacement =
-            item;
-
-          break;
-
-        }
-
-      }
-
-      /* circle */
-      else if (
-        item.isCircle
-      ) {
-
-        const r =
-          (
-            item.diameterPx *
-            PREVIEW_SCALE
-          ) / 2;
-
-        const cx =
-          item.x *
-            PREVIEW_SCALE +
-          r;
-
-        const cy =
-          item.y *
-            PREVIEW_SCALE +
-          r;
-
-        const dist =
-          Math.hypot(
-            mx - cx,
-            my - cy
-          );
-
-        if (
-          dist <= r
         ) {
 
           state.selectedPlacement =
@@ -573,20 +492,16 @@ canvas?.addEventListener(
 canvas?.addEventListener(
   "mouseup",
   () => {
-
     state.isDragging =
       false;
-
   }
 );
 
 canvas?.addEventListener(
   "mouseleave",
   () => {
-
     state.isDragging =
       false;
-
   }
 );
 
@@ -635,9 +550,9 @@ canvas?.addEventListener(
 );
 
 /* =====================================
-   POPUP GLOBAL
+   POPUP
 ===================================== */
-window.showPopup = function(
+function showPopup(
   msg = "Notifikasi"
 ) {
 
@@ -666,18 +581,13 @@ window.showPopup = function(
   );
 
   window.popupTimer =
-    setTimeout(
-      () => {
+    setTimeout(() => {
+      popup.classList.remove(
+        "show"
+      );
+    }, 2200);
 
-        popup.classList.remove(
-          "show"
-        );
-
-      },
-      2200
-    );
-
-};
+}
 
 /* =====================================
    VALIDASI NAMA
