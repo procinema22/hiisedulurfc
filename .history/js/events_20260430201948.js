@@ -1,7 +1,7 @@
 /* =====================================
    FILE: js/events.js
    TRUE FINAL VERSION
-   + FIX SEMBUNYIKAN NAMA
+   FULL FITUR LAMA + AUTO PRICE FIX
 ===================================== */
 
 console.log("EVENTS FINAL LOADED");
@@ -29,7 +29,9 @@ import {
   gapInput,
   manualHargaCheckbox,
   manualHargaBox,
+  manualHargaInput,
   userName,
+  priceDisplay,
   state,
   PREVIEW_SCALE,
   resetState
@@ -40,14 +42,18 @@ import {
   updatePricePreview
 } from "./batch.js";
 
-import { autoPreview } from "./layout.js";
+import {
+  autoPreview
+} from "./layout.js";
 
 import {
   showPageAtIndex,
   renderAllPages
 } from "./render.js";
 
-import { openPdfFile } from "./pdf.js";
+import {
+  openPdfFile
+} from "./pdf.js";
 
 import {
   clearCanvas,
@@ -121,40 +127,6 @@ function cekNamaPelanggan() {
 }
 
 /* =====================================
-   REFRESH UNIVERSAL
-===================================== */
-async function refreshAll() {
-
-  if (!state.batches.length) {
-    updatePricePreview();
-    return;
-  }
-
-  showLoading();
-
-  try {
-
-    await autoPreview();
-
-    updatePricePreview();
-
-    showPageAtIndex(
-      state.currentPageIndex || 0
-    );
-
-  } catch (err) {
-
-    console.error(err);
-
-  } finally {
-
-    hideLoading();
-
-  }
-
-}
-
-/* =====================================
    INIT EVENTS
 ===================================== */
 window.addEventListener(
@@ -186,40 +158,81 @@ window.addEventListener(
 
       }
     );
-
     /* =====================================
-       SEMBUNYIKAN NAMA
-    ===================================== */
-    document
-      .getElementById("hideInfo")
-      ?.addEventListener(
-        "change",
-        async e => {
+   FILE: js/events.js
+   FINALKAN SWITCH SEMBUNYIKAN NAMA
+   Tempel di dalam DOMContentLoaded
+===================================== */
 
-          const aktif =
-            e.target.checked;
+/* =====================================
+   HIDE INFO / SEMBUNYIKAN NAMA
+===================================== */
+document
+.getElementById("hideInfo")
+?.addEventListener(
+  "change",
+  async e => {
 
-          if (userName) {
+    const aktif =
+      e.target.checked;
 
-            userName.disabled =
-              aktif;
+    /* disable input nama */
+    if (userName) {
+      userName.disabled =
+        aktif;
+    }
 
-            if (aktif) {
-              userName.blur();
-            }
+    /* optional kosongkan nama */
+    if (aktif && userName) {
+      userName.blur();
+    }
 
-          }
+    showPopup(
+      aktif
+        ? "Info pelanggan disembunyikan"
+        : "Info pelanggan ditampilkan"
+    );
 
-          showPopup(
-            aktif
-              ? "Info pelanggan disembunyikan"
-              : "Info pelanggan ditampilkan"
-          );
+    /* jika ada foto, rebuild preview */
+    if (state.batches.length) {
 
-          await refreshAll();
+      showLoading();
 
-        }
-      );
+      try {
+
+        await autoPreview();
+
+        updatePricePreview();
+
+        showPageAtIndex(
+          state.currentPageIndex || 0
+        );
+
+      } catch (err) {
+
+        console.error(
+          "HideInfo Error:",
+          err
+        );
+
+        toast(
+          "Gagal refresh preview"
+        );
+
+      } finally {
+
+        hideLoading();
+
+      }
+
+    } else {
+
+      updatePricePreview();
+
+    }
+
+  }
+);
 
     /* preview */
     previewBtn?.addEventListener(
@@ -234,11 +247,27 @@ window.addEventListener(
         if (!cekNamaPelanggan())
           return;
 
-        await refreshAll();
+        showLoading();
 
-        toast(
-          "Preview selesai"
-        );
+        try {
+
+          await autoPreview();
+          updatePricePreview();
+
+          toast(
+            "Preview selesai"
+          );
+
+        } catch (err) {
+
+          console.error(err);
+          toast("Preview gagal");
+
+        } finally {
+
+          hideLoading();
+
+        }
 
       }
     );
@@ -256,11 +285,27 @@ window.addEventListener(
         if (!cekNamaPelanggan())
           return;
 
-        await refreshAll();
+        showLoading();
 
-        toast(
-          "Kolase selesai"
-        );
+        try {
+
+          await autoPreview();
+          updatePricePreview();
+
+          toast(
+            "Kolase selesai"
+          );
+
+        } catch (err) {
+
+          console.error(err);
+          toast("Generate gagal");
+
+        } finally {
+
+          hideLoading();
+
+        }
 
       }
     );
@@ -278,13 +323,29 @@ window.addEventListener(
         if (!cekNamaPelanggan())
           return;
 
-        await refreshAll();
+        showLoading();
 
-        await openPdfFile();
+        try {
 
-        toast(
-          "PDF berhasil dibuat"
-        );
+          await autoPreview();
+          updatePricePreview();
+
+          await openPdfFile();
+
+          toast(
+            "PDF berhasil dibuat"
+          );
+
+        } catch (err) {
+
+          console.error(err);
+          toast("Gagal membuka PDF");
+
+        } finally {
+
+          hideLoading();
+
+        }
 
       }
     );
@@ -299,9 +360,7 @@ window.addEventListener(
           resetState();
 
           refreshBatchList();
-
           clearCanvas();
-
           updatePricePreview();
 
           if (pageNav) {
@@ -339,55 +398,56 @@ window.addEventListener(
       }
     );
 
-    /* mode */
+    /* mode change */
     modeSelect?.addEventListener(
       "change",
       async () => {
 
         if (circleControls) {
           circleControls.style.display =
-            modeSelect.value ===
-            "circle"
+            modeSelect.value === "circle"
               ? "block"
               : "none";
         }
 
         if (customSize) {
           customSize.style.display =
-            sizeSelect?.value ===
-              "custom" &&
-            modeSelect.value !==
-              "circle"
+            sizeSelect?.value === "custom" &&
+            modeSelect.value !== "circle"
               ? "flex"
               : "none";
         }
 
-        await refreshAll();
+        if (state.batches.length) {
+          await autoPreview();
+          updatePricePreview();
+        }
 
       }
     );
 
-    /* size */
+    /* size change */
     sizeSelect?.addEventListener(
       "change",
       async () => {
 
         if (customSize) {
           customSize.style.display =
-            sizeSelect.value ===
-              "custom" &&
-            modeSelect?.value !==
-              "circle"
+            sizeSelect.value === "custom" &&
+            modeSelect?.value !== "circle"
               ? "flex"
               : "none";
         }
 
-        await refreshAll();
+        if (state.batches.length) {
+          await autoPreview();
+          updatePricePreview();
+        }
 
       }
     );
 
-    /* live input */
+    /* live update */
     [
       marginTop,
       marginBottom,
@@ -401,7 +461,14 @@ window.addEventListener(
 
       el?.addEventListener(
         "input",
-        refreshAll
+        async () => {
+
+          if (state.batches.length) {
+            await autoPreview();
+            updatePricePreview();
+          }
+
+        }
       );
 
     });
@@ -459,19 +526,22 @@ canvas?.addEventListener(
           my >= y &&
           my <= y + h
         ) {
+
           state.selectedPlacement =
             item;
+
           break;
         }
 
-      }
-
-      else if (item.isCircle) {
+      } else if (
+        item.isCircle
+      ) {
 
         const r =
-          item.diameterPx *
-          PREVIEW_SCALE /
-          2;
+          (
+            item.diameterPx *
+            PREVIEW_SCALE
+          ) / 2;
 
         const cx =
           item.x *
@@ -490,21 +560,20 @@ canvas?.addEventListener(
           );
 
         if (dist <= r) {
+
           state.selectedPlacement =
             item;
+
           break;
         }
-
       }
-
     }
 
     if (
       state.selectedPlacement
     ) {
 
-      state.isDragging =
-        true;
+      state.isDragging = true;
 
       state.dragStart = {
         x: e.clientX,
@@ -518,7 +587,6 @@ canvas?.addEventListener(
             .selectedPlacement
             .offsetY || 0
       };
-
     }
 
   }
@@ -555,6 +623,7 @@ canvas?.addEventListener(
       state.dragStart.oy + dy;
 
     await renderAllPages();
+    updatePricePreview();
 
     showPageAtIndex(
       state.currentPageIndex
@@ -612,6 +681,7 @@ canvas?.addEventListener(
       scale;
 
     await renderAllPages();
+    updatePricePreview();
 
     showPageAtIndex(
       state.currentPageIndex

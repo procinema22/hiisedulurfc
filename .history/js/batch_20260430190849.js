@@ -1,7 +1,7 @@
 /* =====================================
    FILE: js/batch.js
-   FINAL BARIS MULTI PAGE
-   PALING STABIL UNTUK PROJECT KAMU
+   TRUE FINAL SMART PRICE
+   NORMAL + CIRCLE + HYBRID
 ===================================== */
 
 import {
@@ -137,70 +137,14 @@ export function refreshBatchList() {
 }
 
 /* =====================================
-   DETEKSI JUMLAH BARIS
-===================================== */
-function getRowsUsed(page) {
-
-  if (!page?.length)
-    return 0;
-
-  const rows = [];
-
-  page.forEach(item => {
-
-    const y =
-      Math.round(item.y);
-
-    const ada =
-      rows.some(
-        r =>
-          Math.abs(r - y) < 40
-      );
-
-    if (!ada) {
-      rows.push(y);
-    }
-
-  });
-
-  return rows.length;
-
-}
-
-/* =====================================
-   HARGA PER PAGE
-===================================== */
-function hitungHargaPage(page) {
-
-  if (!page?.length)
-    return 0;
-
-  const rows =
-    getRowsUsed(page);
-
-  if (rows <= 1)
-    return 500;
-
-  if (rows <= 2)
-    return 1000;
-
-  if (rows <= 3)
-    return 1500;
-
-  return 2000;
-
-}
-
-/* =====================================
-   TOTAL AUTO PRICE
+   SMART PRICE
 ===================================== */
 function hitungHargaAI() {
 
-  const pages =
-    state.placementsByPage ||
-    [];
+  const page =
+    state.placementsByPage?.[0] || [];
 
-  if (!pages.length) {
+  if (!page.length) {
 
     const adaFoto =
       state.batches.some(
@@ -211,24 +155,112 @@ function hitungHargaAI() {
     return adaFoto ? 500 : 0;
   }
 
-  let total = 0;
+  let circleCount = 0;
+  let rectCount = 0;
+  let totalArea = 0;
 
-  pages.forEach(page => {
+  const pageArea =
+    2480 * 3508;
 
-    total +=
-      hitungHargaPage(page);
+  page.forEach(item => {
+
+    if (item.isCircle) {
+
+      circleCount++;
+
+      const d =
+        item.diameterPx || 0;
+
+      const r = d / 2;
+
+      totalArea +=
+        Math.PI * r * r;
+
+    } else {
+
+      rectCount++;
+
+      const w =
+        item.boxW || 0;
+
+      const h =
+        item.boxH || 0;
+
+      totalArea += w * h;
+
+    }
 
   });
 
-  /* premium custom */
+  /* =========================
+     PURE CIRCLE MODE
+  ========================= */
+  if (
+    circleCount > 0 &&
+    rectCount === 0
+  ) {
+
+    if (circleCount <= 3)
+      return 1000;
+
+    if (circleCount <= 6)
+      return 1500;
+
+    if (circleCount <= 9)
+      return 2000;
+
+    return 2500;
+  }
+
+  /* =========================
+     NORMAL / HYBRID MODE
+  ========================= */
+  let persen =
+    totalArea / pageArea;
+
+  if (persen < 0)
+    persen = 0;
+
+  if (persen > 1)
+    persen = 1;
+
+  let harga = 500;
+
+  if (persen <= 0.25)
+    harga = 500;
+
+  else if (persen <= 0.50)
+    harga = 1000;
+
+  else if (persen <= 0.75)
+    harga = 1500;
+
+  else
+    harga = 2000;
+
+  /* hybrid bonus circle */
+  if (circleCount > 0) {
+
+    if (circleCount <= 4)
+      harga += 500;
+
+    else if (circleCount <= 8)
+      harga += 750;
+
+    else
+      harga += 1000;
+
+  }
+
+  /* custom premium */
   if (
     sizeSelect?.value ===
     "custom"
   ) {
-    total += 500;
+    harga += 500;
   }
 
-  return total;
+  return harga;
 
 }
 

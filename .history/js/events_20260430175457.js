@@ -1,7 +1,7 @@
 /* =====================================
    FILE: js/events.js
-   TRUE FINAL VERSION
-   + FIX SEMBUNYIKAN NAMA
+   FINAL PRODUCTION VERSION
+   UI Events + Drag + Zoom + Popup
 ===================================== */
 
 console.log("EVENTS FINAL LOADED");
@@ -29,7 +29,9 @@ import {
   gapInput,
   manualHargaCheckbox,
   manualHargaBox,
+  manualHargaInput,
   userName,
+  priceDisplay,
   state,
   PREVIEW_SCALE,
   resetState
@@ -40,14 +42,18 @@ import {
   updatePricePreview
 } from "./batch.js";
 
-import { autoPreview } from "./layout.js";
+import {
+  autoPreview
+} from "./layout.js";
 
 import {
   showPageAtIndex,
   renderAllPages
 } from "./render.js";
 
-import { openPdfFile } from "./pdf.js";
+import {
+  openPdfFile
+} from "./pdf.js";
 
 import {
   clearCanvas,
@@ -57,111 +63,15 @@ import {
 } from "./helpers.js";
 
 /* =====================================
-   POPUP GLOBAL
-===================================== */
-window.showPopup = function (
-  msg = "Notifikasi"
-) {
-  const popup =
-    document.getElementById(
-      "popupNotif"
-    );
-
-  const text =
-    document.getElementById(
-      "popupText"
-    );
-
-  if (!popup || !text) return;
-
-  text.textContent = msg;
-
-  popup.classList.add("show");
-
-  clearTimeout(
-    window.popupTimer
-  );
-
-  window.popupTimer =
-    setTimeout(() => {
-      popup.classList.remove(
-        "show"
-      );
-    }, 2200);
-};
-
-/* =====================================
-   VALIDASI NAMA
-===================================== */
-function cekNamaPelanggan() {
-
-  if (
-    document.getElementById(
-      "hideInfo"
-    )?.checked
-  ) {
-    return true;
-  }
-
-  const nama =
-    userName?.value?.trim();
-
-  if (!nama) {
-
-    showPopup(
-      "Nama pelanggan wajib diisi"
-    );
-
-    userName?.focus();
-
-    return false;
-  }
-
-  return true;
-}
-
-/* =====================================
-   REFRESH UNIVERSAL
-===================================== */
-async function refreshAll() {
-
-  if (!state.batches.length) {
-    updatePricePreview();
-    return;
-  }
-
-  showLoading();
-
-  try {
-
-    await autoPreview();
-
-    updatePricePreview();
-
-    showPageAtIndex(
-      state.currentPageIndex || 0
-    );
-
-  } catch (err) {
-
-    console.error(err);
-
-  } finally {
-
-    hideLoading();
-
-  }
-
-}
-
-/* =====================================
    INIT EVENTS
 ===================================== */
 window.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    /* manual price */
+    /* ---------------------------
+       MANUAL HARGA
+    --------------------------- */
     manualHargaCheckbox?.addEventListener(
       "change",
       () => {
@@ -176,52 +86,41 @@ window.addEventListener(
               : "none";
         }
 
-        updatePricePreview();
+        if (aktif) {
 
-        showPopup(
-          aktif
-            ? "Harga manual aktif"
-            : "Harga otomatis aktif"
-        );
+          const harga =
+            parseInt(
+              manualHargaInput?.value
+            ) || 500;
+
+          if (priceDisplay) {
+            priceDisplay.textContent =
+              "Harga: Rp " +
+              harga.toLocaleString(
+                "id-ID"
+              );
+          }
+
+          showPopup(
+            "Harga manual aktif"
+          );
+
+        } else {
+
+          updatePricePreview();
+
+          showPopup(
+            "Harga otomatis aktif"
+          );
+
+        }
 
       }
     );
 
-    /* =====================================
-       SEMBUNYIKAN NAMA
-    ===================================== */
-    document
-      .getElementById("hideInfo")
-      ?.addEventListener(
-        "change",
-        async e => {
-
-          const aktif =
-            e.target.checked;
-
-          if (userName) {
-
-            userName.disabled =
-              aktif;
-
-            if (aktif) {
-              userName.blur();
-            }
-
-          }
-
-          showPopup(
-            aktif
-              ? "Info pelanggan disembunyikan"
-              : "Info pelanggan ditampilkan"
-          );
-
-          await refreshAll();
-
-        }
-      );
-
-    /* preview */
+    /* ---------------------------
+       PREVIEW
+    --------------------------- */
     previewBtn?.addEventListener(
       "click",
       async () => {
@@ -234,16 +133,36 @@ window.addEventListener(
         if (!cekNamaPelanggan())
           return;
 
-        await refreshAll();
+        showLoading();
 
-        toast(
-          "Preview selesai"
-        );
+        try {
+
+          await autoPreview();
+
+          toast(
+            "Preview selesai"
+          );
+
+        } catch (err) {
+
+          console.error(err);
+
+          toast(
+            "Preview gagal"
+          );
+
+        } finally {
+
+          hideLoading();
+
+        }
 
       }
     );
 
-    /* generate */
+    /* ---------------------------
+       GENERATE
+    --------------------------- */
     generateBtn?.addEventListener(
       "click",
       async () => {
@@ -256,40 +175,73 @@ window.addEventListener(
         if (!cekNamaPelanggan())
           return;
 
-        await refreshAll();
+        showLoading();
 
-        toast(
-          "Kolase selesai"
-        );
+        try {
 
-      }
-    );
+          await autoPreview();
 
-    /* pdf */
-    downloadPdf?.addEventListener(
-      "click",
-      async () => {
+          toast(
+            "Kolase selesai"
+          );
 
-        if (!state.batches.length) {
-          toast("Belum ada foto");
-          return;
+        } catch (err) {
+
+          console.error(err);
+
+          toast(
+            "Generate gagal"
+          );
+
+        } finally {
+
+          hideLoading();
+
         }
 
-        if (!cekNamaPelanggan())
-          return;
-
-        await refreshAll();
-
-        await openPdfFile();
-
-        toast(
-          "PDF berhasil dibuat"
-        );
-
       }
     );
 
-    /* reset */
+   /* ---------------------------
+   PDF
+--------------------------- */
+downloadPdf?.addEventListener(
+  "click",
+  async () => {
+
+    if (!state.batches.length) {
+      toast("Belum ada foto");
+      return;
+    }
+
+    if (!cekNamaPelanggan())
+      return;
+
+    showLoading();
+
+    try {
+
+      await openPdfFile();
+
+      toast("PDF berhasil dibuat");
+
+    } catch (err) {
+
+      console.error(err);
+
+      toast("Gagal membuka PDF");
+
+    } finally {
+
+      hideLoading();
+
+    }
+
+  }
+);
+    /* ---------------------------
+       RESET
+    --------------------------- */
     document
       .getElementById("reset")
       ?.addEventListener(
@@ -320,26 +272,34 @@ window.addEventListener(
         }
       );
 
-    /* page nav */
+    /* ---------------------------
+       PAGE NAV
+    --------------------------- */
     prevPageBtn?.addEventListener(
       "click",
       () => {
+
         showPageAtIndex(
           state.currentPageIndex - 1
         );
+
       }
     );
 
     nextPageBtn?.addEventListener(
       "click",
       () => {
+
         showPageAtIndex(
           state.currentPageIndex + 1
         );
+
       }
     );
 
-    /* mode */
+    /* ---------------------------
+       MODE CHANGE
+    --------------------------- */
     modeSelect?.addEventListener(
       "change",
       async () => {
@@ -362,12 +322,18 @@ window.addEventListener(
               : "none";
         }
 
-        await refreshAll();
+        if (
+          state.batches.length
+        ) {
+          await autoPreview();
+        }
 
       }
     );
 
-    /* size */
+    /* ---------------------------
+       SIZE CHANGE
+    --------------------------- */
     sizeSelect?.addEventListener(
       "change",
       async () => {
@@ -382,12 +348,18 @@ window.addEventListener(
               : "none";
         }
 
-        await refreshAll();
+        if (
+          state.batches.length
+        ) {
+          await autoPreview();
+        }
 
       }
     );
 
-    /* live input */
+    /* ---------------------------
+       LIVE UPDATE
+    --------------------------- */
     [
       marginTop,
       marginBottom,
@@ -401,7 +373,15 @@ window.addEventListener(
 
       el?.addEventListener(
         "input",
-        refreshAll
+        async () => {
+
+          if (
+            state.batches.length
+          ) {
+            await autoPreview();
+          }
+
+        }
       );
 
     });
@@ -420,13 +400,16 @@ canvas?.addEventListener(
       canvas.getBoundingClientRect();
 
     const mx =
-      e.clientX - rect.left;
+      e.clientX -
+      rect.left;
 
     const my =
-      e.clientY - rect.top;
+      e.clientY -
+      rect.top;
 
     const page =
-      state.placementsByPage[
+      state
+        .placementsByPage[
         state.currentPageIndex
       ] || [];
 
@@ -435,6 +418,7 @@ canvas?.addEventListener(
 
     for (const item of page) {
 
+      /* rectangle */
       if (item.isRectangle) {
 
         const x =
@@ -459,19 +443,26 @@ canvas?.addEventListener(
           my >= y &&
           my <= y + h
         ) {
+
           state.selectedPlacement =
             item;
+
           break;
+
         }
 
       }
 
-      else if (item.isCircle) {
+      /* circle */
+      else if (
+        item.isCircle
+      ) {
 
         const r =
-          item.diameterPx *
-          PREVIEW_SCALE /
-          2;
+          (
+            item.diameterPx *
+            PREVIEW_SCALE
+          ) / 2;
 
         const cx =
           item.x *
@@ -489,10 +480,15 @@ canvas?.addEventListener(
             my - cy
           );
 
-        if (dist <= r) {
+        if (
+          dist <= r
+        ) {
+
           state.selectedPlacement =
             item;
+
           break;
+
         }
 
       }
@@ -540,19 +536,27 @@ canvas?.addEventListener(
       (
         e.clientX -
         state.dragStart.x
-      ) / PREVIEW_SCALE;
+      ) /
+      PREVIEW_SCALE;
 
     const dy =
       (
         e.clientY -
         state.dragStart.y
-      ) / PREVIEW_SCALE;
+      ) /
+      PREVIEW_SCALE;
 
-    state.selectedPlacement.offsetX =
-      state.dragStart.ox + dx;
+    state
+      .selectedPlacement
+      .offsetX =
+      state.dragStart.ox +
+      dx;
 
-    state.selectedPlacement.offsetY =
-      state.dragStart.oy + dy;
+    state
+      .selectedPlacement
+      .offsetY =
+      state.dragStart.oy +
+      dy;
 
     await renderAllPages();
 
@@ -563,25 +567,31 @@ canvas?.addEventListener(
   }
 );
 
-/* drag end */
+/* =====================================
+   DRAG END
+===================================== */
 canvas?.addEventListener(
   "mouseup",
   () => {
+
     state.isDragging =
       false;
+
   }
 );
 
 canvas?.addEventListener(
   "mouseleave",
   () => {
+
     state.isDragging =
       false;
+
   }
 );
 
 /* =====================================
-   ZOOM
+   WHEEL ZOOM
 ===================================== */
 canvas?.addEventListener(
   "wheel",
@@ -594,7 +604,8 @@ canvas?.addEventListener(
     e.preventDefault();
 
     let scale =
-      state.selectedPlacement
+      state
+        .selectedPlacement
         .scale || 1;
 
     scale +=
@@ -608,7 +619,9 @@ canvas?.addEventListener(
     if (scale > 5)
       scale = 5;
 
-    state.selectedPlacement.scale =
+    state
+      .selectedPlacement
+      .scale =
       scale;
 
     await renderAllPages();
@@ -620,3 +633,75 @@ canvas?.addEventListener(
   },
   { passive:false }
 );
+
+/* =====================================
+   POPUP GLOBAL
+===================================== */
+window.showPopup = function(
+  msg = "Notifikasi"
+) {
+
+  const popup =
+    document.getElementById(
+      "popupNotif"
+    );
+
+  const text =
+    document.getElementById(
+      "popupText"
+    );
+
+  if (!popup || !text)
+    return;
+
+  text.textContent =
+    msg;
+
+  popup.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    window.popupTimer
+  );
+
+  window.popupTimer =
+    setTimeout(
+      () => {
+
+        popup.classList.remove(
+          "show"
+        );
+
+      },
+      2200
+    );
+
+};
+
+/* =====================================
+   FIX FILE: js/events.js
+   BAGIAN VALIDASI NAMA
+   GANTI FUNGSI LAMA DENGAN INI
+===================================== */
+
+function cekNamaPelanggan() {
+
+  /* jika switch sembunyikan nama aktif */
+  if (window.hideInfo?.checked || document.getElementById("hideInfo")?.checked) {
+    return true;
+  }
+
+  const nama = userName?.value?.trim();
+
+  if (!nama) {
+
+    showPopup("Nama pelanggan wajib diisi");
+
+    userName?.focus();
+
+    return false;
+  }
+
+  return true;
+}

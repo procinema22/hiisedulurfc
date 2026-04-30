@@ -338,7 +338,7 @@ export async function renderAllPages() {
       i === 0 &&
       !hideInfo
     ) {
-      
+      drawFooter(pctx);
     }
 
     state.pagesCache.push(pc);

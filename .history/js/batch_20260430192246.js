@@ -1,7 +1,7 @@
 /* =====================================
    FILE: js/batch.js
-   FINAL BARIS MULTI PAGE
-   PALING STABIL UNTUK PROJECT KAMU
+   FINAL MULTI PAGE NO DISKON
+   Harga dihitung per lembar
 ===================================== */
 
 import {
@@ -137,37 +137,6 @@ export function refreshBatchList() {
 }
 
 /* =====================================
-   DETEKSI JUMLAH BARIS
-===================================== */
-function getRowsUsed(page) {
-
-  if (!page?.length)
-    return 0;
-
-  const rows = [];
-
-  page.forEach(item => {
-
-    const y =
-      Math.round(item.y);
-
-    const ada =
-      rows.some(
-        r =>
-          Math.abs(r - y) < 40
-      );
-
-    if (!ada) {
-      rows.push(y);
-    }
-
-  });
-
-  return rows.length;
-
-}
-
-/* =====================================
    HARGA PER PAGE
 ===================================== */
 function hitungHargaPage(page) {
@@ -175,16 +144,72 @@ function hitungHargaPage(page) {
   if (!page?.length)
     return 0;
 
-  const rows =
-    getRowsUsed(page);
+  let bottomY = 0;
+  let circleOnly = true;
+  let circleCount = 0;
 
-  if (rows <= 1)
+  page.forEach(item => {
+
+    let h = 0;
+
+    if (item.isCircle) {
+
+      h =
+        item.diameterPx || 0;
+
+      circleCount++;
+
+    } else {
+
+      h =
+        item.boxH || 0;
+
+      circleOnly = false;
+
+    }
+
+    const y2 =
+      item.y + h;
+
+    if (y2 > bottomY)
+      bottomY = y2;
+
+  });
+
+  /* =========================
+     PURE CIRCLE MODE
+  ========================= */
+  if (circleOnly) {
+
+    if (circleCount <= 3)
+      return 1000;
+
+    if (circleCount <= 6)
+      return 1500;
+
+    if (circleCount <= 9)
+      return 2000;
+
+    return 2500;
+  }
+
+  /* =========================
+     ZONA VERTIKAL
+  ========================= */
+  const printableHeight =
+    3508;
+
+  const persen =
+    bottomY /
+    printableHeight;
+
+  if (persen <= 0.25)
     return 500;
 
-  if (rows <= 2)
+  if (persen <= 0.45)
     return 1000;
 
-  if (rows <= 3)
+  if (persen <= 0.65)
     return 1500;
 
   return 2000;
@@ -220,7 +245,7 @@ function hitungHargaAI() {
 
   });
 
-  /* premium custom */
+  /* custom premium */
   if (
     sizeSelect?.value ===
     "custom"

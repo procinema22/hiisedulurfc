@@ -1,7 +1,10 @@
 /* =====================================
    FILE: js/layout.js
-   FINAL FIX FOOTER SAFE PAGE 1
-   Jika menyentuh footer -> page berikutnya
+   FINAL FULL VERSION
+   - Footer aman page 1
+   - Hide nama ON = full kertas
+   - Jika sentuh footer pindah page berikutnya
+   - Support normal / circle / custom
 ===================================== */
 
 import {
@@ -21,8 +24,15 @@ import {
   loadImage
 } from "./helpers.js";
 
-/* tinggi footer page 1 */
+/* tinggi area footer */
 const FOOTER_HEIGHT = 220;
+
+/* =====================================
+   CEK MODE SEMBUNYIKAN NAMA
+===================================== */
+function isHideInfo() {
+  return document.getElementById("hideInfo")?.checked || false;
+}
 
 /* =====================================
    AUTO PREVIEW
@@ -48,36 +58,30 @@ export async function buildPlacementsForPages() {
   const fullW = 2480;
   const fullH = 3508;
 
-  const margin =
-    getMarginsPx();
-
-  const gap =
-    getGap();
+  const margin = getMarginsPx();
+  const gap = getGap();
 
   let pageIndex = 0;
 
-  let x =
-    margin.left;
-
-  let y =
-    margin.top;
+  let x = margin.left;
+  let y = margin.top;
 
   let rowMaxH = 0;
 
-  /* =========================
-     batas bawah tiap halaman
-     page 1 sisakan footer
-  ========================= */
+  /* =====================================
+     BATAS BAWAH PAGE
+     page 1 + footer jika nama tampil
+  ===================================== */
   function bottomLimit() {
 
-    if (pageIndex === 0) {
+    const hideInfo = isHideInfo();
 
+    if (pageIndex === 0 && !hideInfo) {
       return (
         fullH -
         margin.bottom -
         FOOTER_HEIGHT
       );
-
     }
 
     return (
@@ -87,32 +91,75 @@ export async function buildPlacementsForPages() {
 
   }
 
-  /* pindah page */
+  /* =====================================
+     PAGE BARU
+  ===================================== */
   function nextPage() {
 
     pageIndex++;
 
-    state.placementsByPage[
-      pageIndex
-    ] = [];
+    state.placementsByPage[pageIndex] = [];
 
-    x =
-      margin.left;
-
-    y =
-      margin.top;
-
+    x = margin.left;
+    y = margin.top;
     rowMaxH = 0;
 
   }
 
   /* =====================================
-     LOOP ALL BATCH
+     PLACE ITEM GENERIC
+  ===================================== */
+  function placeItem(data, w, h) {
+
+    /* pindah baris */
+    if (
+      x + w >
+      fullW - margin.right
+    ) {
+
+      x = margin.left;
+
+      y += rowMaxH + gap;
+
+      rowMaxH = 0;
+
+    }
+
+    /* kalau sentuh footer / bawah */
+    if (
+      y + h >
+      bottomLimit()
+    ) {
+
+      nextPage();
+
+    }
+
+    state.placementsByPage[pageIndex].push(data);
+
+    rowMaxH =
+      Math.max(
+        rowMaxH,
+        h
+      );
+
+    x += w + gap;
+
+  }
+
+  /* =====================================
+     LOOP BATCH
   ===================================== */
   for (const batch of state.batches) {
 
     const mode =
       batch.mode || "normal";
+
+    const copies =
+      Math.max(
+        1,
+        batch.copy || 1
+      );
 
     /* =================================
        MODE CIRCLE
@@ -132,12 +179,6 @@ export async function buildPlacementsForPages() {
         dCm *
         PX_PER_CM;
 
-      const copies =
-        Math.max(
-          1,
-          batch.copy || 1
-        );
-
       for (
         let c = 0;
         c < copies;
@@ -152,64 +193,26 @@ export async function buildPlacementsForPages() {
           if (!imgObj)
             continue;
 
-          /* pindah baris */
-          if (
-            x + diameterPx >
-            fullW -
-              margin.right
-          ) {
+          placeItem(
+            {
+              file,
+              imgObj,
 
-            x =
-              margin.left;
+              x,
+              y,
 
-            y +=
-              rowMaxH +
-              gap;
+              diameterPx,
 
-            rowMaxH = 0;
+              isCircle: true,
 
-          }
+              offsetX: 0,
+              offsetY: 0,
 
-          /* kalau sentuh footer -> next page */
-          if (
-            y + diameterPx >
-            bottomLimit()
-          ) {
-
-            nextPage();
-
-          }
-
-          state.placementsByPage[
-            pageIndex
-          ].push({
-
-            file,
-            imgObj,
-
-            x,
-            y,
-
+              scale: 1
+            },
             diameterPx,
-
-            isCircle: true,
-
-            offsetX: 0,
-            offsetY: 0,
-
-            scale: 1
-
-          });
-
-          rowMaxH =
-            Math.max(
-              rowMaxH,
-              diameterPx
-            );
-
-          x +=
-            diameterPx +
-            gap;
+            diameterPx
+          );
 
         }
 
@@ -225,8 +228,7 @@ export async function buildPlacementsForPages() {
       let wcm, hcm;
 
       if (
-        batch.size ===
-        "custom"
+        batch.size === "custom"
       ) {
 
         wcm =
@@ -261,12 +263,6 @@ export async function buildPlacementsForPages() {
         hcm *
         PX_PER_CM;
 
-      const copies =
-        Math.max(
-          1,
-          batch.copy || 1
-        );
-
       for (
         let c = 0;
         c < copies;
@@ -281,65 +277,27 @@ export async function buildPlacementsForPages() {
           if (!imgObj)
             continue;
 
-          /* pindah baris */
-          if (
-            x + boxW >
-            fullW -
-              margin.right
-          ) {
+          placeItem(
+            {
+              file,
+              imgObj,
 
-            x =
-              margin.left;
+              x,
+              y,
 
-            y +=
-              rowMaxH +
-              gap;
+              boxW,
+              boxH,
 
-            rowMaxH = 0;
+              isRectangle: true,
 
-          }
+              offsetX: 0,
+              offsetY: 0,
 
-          /* kalau tabrak footer -> next page */
-          if (
-            y + boxH >
-            bottomLimit()
-          ) {
-
-            nextPage();
-
-          }
-
-          state.placementsByPage[
-            pageIndex
-          ].push({
-
-            file,
-            imgObj,
-
-            x,
-            y,
-
+              scale: 1
+            },
             boxW,
-            boxH,
-
-            isRectangle: true,
-
-            offsetX: 0,
-            offsetY: 0,
-
-            scale: 1
-
-          });
-
-          rowMaxH =
-            Math.max(
-              rowMaxH,
-              boxH
-            );
-
-          x +=
-            boxW +
-            gap;
+            boxH
+          );
 
         }
 

@@ -1,7 +1,7 @@
 /* =====================================
    FILE: js/batch.js
-   FINAL BARIS MULTI PAGE
-   PALING STABIL UNTUK PROJECT KAMU
+   TRUE FINAL FIX
+   NO PRICE 0 + SUPPORT CIRCLE
 ===================================== */
 
 import {
@@ -35,17 +35,13 @@ export function refreshBatchList() {
 
   state.batches.forEach((batch, index) => {
 
-    const row =
-      document.createElement("div");
-
-    row.className =
-      "batch-row";
+    const row = document.createElement("div");
+    row.className = "batch-row";
 
     const sizeText =
       batch.size === "custom"
         ? `${batch.customW} x ${batch.customH}`
-        : (batch.size || "2x3")
-            .replace("x", " x ");
+        : (batch.size || "2x3").replace("x", " x ");
 
     row.innerHTML = `
       <div style="flex:1">
@@ -63,11 +59,8 @@ export function refreshBatchList() {
 
     copyInput.type = "number";
     copyInput.min = "1";
-    copyInput.value =
-      batch.copy || 1;
-
-    copyInput.style.width =
-      "60px";
+    copyInput.value = batch.copy || 1;
+    copyInput.style.width = "60px";
 
     copyInput.addEventListener(
       "change",
@@ -76,9 +69,7 @@ export function refreshBatchList() {
         batch.copy =
           Math.max(
             1,
-            parseInt(
-              copyInput.value
-            ) || 1
+            parseInt(copyInput.value) || 1
           );
 
         await autoPreview();
@@ -98,10 +89,7 @@ export function refreshBatchList() {
       "click",
       async () => {
 
-        state.batches.splice(
-          index,
-          1
-        );
+        state.batches.splice(index, 1);
 
         refreshBatchList();
 
@@ -137,98 +125,112 @@ export function refreshBatchList() {
 }
 
 /* =====================================
-   DETEKSI JUMLAH BARIS
-===================================== */
-function getRowsUsed(page) {
-
-  if (!page?.length)
-    return 0;
-
-  const rows = [];
-
-  page.forEach(item => {
-
-    const y =
-      Math.round(item.y);
-
-    const ada =
-      rows.some(
-        r =>
-          Math.abs(r - y) < 40
-      );
-
-    if (!ada) {
-      rows.push(y);
-    }
-
-  });
-
-  return rows.length;
-
-}
-
-/* =====================================
-   HARGA PER PAGE
-===================================== */
-function hitungHargaPage(page) {
-
-  if (!page?.length)
-    return 0;
-
-  const rows =
-    getRowsUsed(page);
-
-  if (rows <= 1)
-    return 500;
-
-  if (rows <= 2)
-    return 1000;
-
-  if (rows <= 3)
-    return 1500;
-
-  return 2000;
-
-}
-
-/* =====================================
-   TOTAL AUTO PRICE
+   AI AUTO PRICE
 ===================================== */
 function hitungHargaAI() {
 
-  const pages =
-    state.placementsByPage ||
-    [];
+  const page =
+    state.placementsByPage?.[0] || [];
 
-  if (!pages.length) {
+  /* jika ada foto tapi page belum siap */
+  if (!page.length) {
 
     const adaFoto =
       state.batches.some(
-        b =>
-          (b.files?.length || 0) > 0
+        b => (b.files?.length || 0) > 0
       );
 
     return adaFoto ? 500 : 0;
   }
 
-  let total = 0;
+  let totalArea = 0;
+  let circleCount = 0;
 
-  pages.forEach(page => {
+  const pageArea =
+    2480 * 3508;
 
-    total +=
-      hitungHargaPage(page);
+  page.forEach(item => {
+
+    /* circle */
+    if (item.isCircle) {
+
+      circleCount++;
+
+      const d =
+        item.diameterPx ||
+        item.boxW ||
+        item.boxH ||
+        0;
+
+      const r = d / 2;
+
+      totalArea +=
+        Math.PI * r * r;
+
+    }
+
+    /* rectangle */
+    else {
+
+      const w =
+        item.boxW || 0;
+
+      const h =
+        item.boxH || 0;
+
+      totalArea += w * h;
+
+    }
 
   });
+
+  let persen =
+    totalArea / pageArea;
+
+  if (persen < 0)
+    persen = 0;
+
+  if (persen > 1)
+    persen = 1;
+
+  let harga = 500;
+
+  /* tier isi halaman */
+  if (persen <= 0.25)
+    harga = 500;
+
+  else if (persen <= 0.50)
+    harga = 1000;
+
+  else if (persen <= 0.75)
+    harga = 1500;
+
+  else
+    harga = 2000;
+
+  /* premium lingkaran */
+  if (circleCount > 0) {
+
+    if (circleCount <= 4)
+      harga += 500;
+
+    else if (circleCount <= 8)
+      harga += 750;
+
+    else
+      harga += 1000;
+
+  }
 
   /* premium custom */
   if (
     sizeSelect?.value ===
     "custom"
   ) {
-    total += 500;
+    harga += 500;
   }
 
-  return total;
+  return harga;
 
 }
 
@@ -237,14 +239,14 @@ function hitungHargaAI() {
 ===================================== */
 export function updatePricePreview() {
 
-  if (!priceDisplay)
-    return;
+  if (!priceDisplay) return;
+
+  const manualMode =
+    manualHargaCheckbox?.checked;
 
   let harga = 0;
 
-  if (
-    manualHargaCheckbox?.checked
-  ) {
+  if (manualMode) {
 
     harga =
       Math.max(

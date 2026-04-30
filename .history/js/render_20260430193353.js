@@ -1,10 +1,7 @@
 /* =====================================
    FILE: js/render.js
-   FINAL FULL VERSION
-   - Preview bersih
-   - Footer hanya saat nama tampil
-   - Hide nama ON = footer hilang
-   - Multi page stabil
+   FINAL FOOTER PAGE 1 ONLY
+   FOTO TIDAK TABRAK FOOTER
 ===================================== */
 
 import {
@@ -29,17 +26,11 @@ import {
 const FULL_W = 2480;
 const FULL_H = 3508;
 
+/* tinggi footer asli */
 export const FOOTER_HEIGHT = 220;
 
 /* =====================================
-   CEK HIDE INFO
-===================================== */
-function isHideInfo() {
-  return document.getElementById("hideInfo")?.checked || false;
-}
-
-/* =====================================
-   DRAW RECTANGLE COVER
+   DRAW RECTANGLE
 ===================================== */
 export function drawImageCover(
   ctxLocal,
@@ -104,7 +95,9 @@ export function drawImageCover(
 
   ctxLocal.restore();
 
-  ctxLocal.strokeStyle = "#000";
+  ctxLocal.strokeStyle =
+    "#000";
+
   ctxLocal.lineWidth = 2;
 
   ctxLocal.strokeRect(
@@ -130,13 +123,20 @@ export function drawCircle(
   scaleZoom = 1
 ) {
 
-  const r = diameter / 2;
+  const r =
+    diameter / 2;
 
-  const cx = x + r;
-  const cy = y + r;
+  const cx =
+    x + r;
 
-  const iw = img.width;
-  const ih = img.height;
+  const cy =
+    y + r;
+
+  const iw =
+    img.width;
+
+  const ih =
+    img.height;
 
   const baseScale =
     Math.max(
@@ -155,10 +155,14 @@ export function drawCircle(
     ih * scale;
 
   const dx =
-    cx - drawW / 2 + offsetX;
+    cx -
+    drawW / 2 +
+    offsetX;
 
   const dy =
-    cy - drawH / 2 + offsetY;
+    cy -
+    drawH / 2 +
+    offsetY;
 
   ctxLocal.save();
 
@@ -201,39 +205,55 @@ export function drawCircle(
 }
 
 /* =====================================
-   DRAW FOOTER
+   DRAW FOOTER PAGE 1 ONLY
 ===================================== */
-function drawFooter(pctx) {
+function drawFooter(
+  pctx
+) {
 
   const y =
-    (FULL_H - FOOTER_HEIGHT) *
+    (FULL_H -
+      FOOTER_HEIGHT) *
     PREVIEW_SCALE;
 
-  pctx.fillStyle = "#fff";
+  pctx.fillStyle =
+    "#ffffff";
 
   pctx.fillRect(
     0,
     y,
-    FULL_W * PREVIEW_SCALE,
-    FOOTER_HEIGHT * PREVIEW_SCALE
+    FULL_W *
+      PREVIEW_SCALE,
+    FOOTER_HEIGHT *
+      PREVIEW_SCALE
   );
 
-  pctx.strokeStyle = "#000";
+  pctx.strokeStyle =
+    "#000";
+
   pctx.lineWidth = 2;
 
   pctx.beginPath();
 
-  pctx.moveTo(40, y);
+  pctx.moveTo(
+    40,
+    y
+  );
 
   pctx.lineTo(
-    FULL_W * PREVIEW_SCALE - 40,
+    FULL_W *
+      PREVIEW_SCALE -
+      40,
     y
   );
 
   pctx.stroke();
 
-  pctx.fillStyle = "#000";
-  pctx.font = "bold 18px Arial";
+  pctx.fillStyle =
+    "#000";
+
+  pctx.font =
+    "bold 18px Arial";
 
   pctx.fillText(
     "NAMA PEMESAN",
@@ -243,7 +263,9 @@ function drawFooter(pctx) {
 
   pctx.fillText(
     "HARGA",
-    FULL_W * PREVIEW_SCALE - 220,
+    FULL_W *
+      PREVIEW_SCALE -
+      220,
     y + 35
   );
 
@@ -256,17 +278,18 @@ export async function renderAllPages() {
 
   state.pagesCache = [];
 
-  const hideInfo =
-    isHideInfo();
-
   for (
     let i = 0;
-    i < state.placementsByPage.length;
+    i <
+    state.placementsByPage.length;
     i++
   ) {
 
     const page =
-      state.placementsByPage[i];
+      state
+        .placementsByPage[
+        i
+      ];
 
     const pc =
       document.createElement(
@@ -284,7 +307,8 @@ export async function renderAllPages() {
     const pctx =
       pc.getContext("2d");
 
-    pctx.fillStyle = "#fff";
+    pctx.fillStyle =
+      "#fff";
 
     pctx.fillRect(
       0,
@@ -295,53 +319,71 @@ export async function renderAllPages() {
 
     for (const item of page) {
 
-      if (item.isRectangle) {
+      if (
+        item.isRectangle
+      ) {
 
         drawImageCover(
           pctx,
           item.imgObj,
-          item.x * PREVIEW_SCALE,
-          item.y * PREVIEW_SCALE,
-          item.boxW * PREVIEW_SCALE,
-          item.boxH * PREVIEW_SCALE,
-          (item.offsetX || 0) *
+          item.x *
             PREVIEW_SCALE,
-          (item.offsetY || 0) *
+          item.y *
             PREVIEW_SCALE,
-          item.scale || 1
+          item.boxW *
+            PREVIEW_SCALE,
+          item.boxH *
+            PREVIEW_SCALE,
+          (item.offsetX ||
+            0) *
+            PREVIEW_SCALE,
+          (item.offsetY ||
+            0) *
+            PREVIEW_SCALE,
+          item.scale ||
+            1
         );
 
       }
 
-      else if (item.isCircle) {
+      else if (
+        item.isCircle
+      ) {
 
         drawCircle(
           pctx,
           item.imgObj,
-          item.x * PREVIEW_SCALE,
-          item.y * PREVIEW_SCALE,
-          item.diameterPx *
+          item.x *
             PREVIEW_SCALE,
-          (item.offsetX || 0) *
+          item.y *
             PREVIEW_SCALE,
-          (item.offsetY || 0) *
+          item
+            .diameterPx *
             PREVIEW_SCALE,
-          item.scale || 1
+          (item.offsetX ||
+            0) *
+            PREVIEW_SCALE,
+          (item.offsetY ||
+            0) *
+            PREVIEW_SCALE,
+          item.scale ||
+            1
         );
 
       }
 
     }
 
-    /* footer hanya page 1 jika nama tampil */
-    if (
-      i === 0 &&
-      !hideInfo
-    ) {
-      
+    /* footer hanya page 1 */
+    if (i === 0) {
+      drawFooter(
+        pctx
+      );
     }
 
-    state.pagesCache.push(pc);
+    state.pagesCache.push(
+      pc
+    );
 
   }
 
@@ -355,22 +397,22 @@ export function showPageAtIndex(i) {
   if (
     !state.pagesCache.length
   ) {
-
     clearCanvas();
     return;
-
   }
 
   state.currentPageIndex =
     clamp(
       i,
       0,
-      state.pagesCache.length - 1
+      state.pagesCache
+        .length - 1
     );
 
   const page =
     state.pagesCache[
-      state.currentPageIndex
+      state
+        .currentPageIndex
     ];
 
   clearCanvas();
@@ -395,15 +437,19 @@ export function updatePageNav() {
   if (!pageNav) return;
 
   pageNav.style.display =
-    state.pagesCache.length > 1
+    state.pagesCache
+      .length > 1
       ? "flex"
       : "none";
 
   pageIndicator.textContent =
     `Halaman ${
-      state.currentPageIndex + 1
+      state
+        .currentPageIndex +
+      1
     } / ${
-      state.pagesCache.length
+      state.pagesCache
+        .length
     }`;
 
   prevPageBtn.disabled =
@@ -411,6 +457,7 @@ export function updatePageNav() {
 
   nextPageBtn.disabled =
     state.currentPageIndex ===
-    state.pagesCache.length - 1;
+    state.pagesCache
+      .length - 1;
 
 }
