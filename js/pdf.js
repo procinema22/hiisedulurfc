@@ -57,42 +57,69 @@ async function renderFullPages() {
       fullH
     );
 
-    for (const item of page) {
+    
+for (const item of page) {
 
-      /* rectangle */
-      if (item.isRectangle) {
+  /* =========================
+     RECTANGLE
+  ========================= */
+  if (
+    item.type ===
+    "rectangle"
+  ) {
 
-        drawImageCover(
-          pctx,
-          item.imgObj,
-          item.x,
-          item.y,
-          item.boxW,
-          item.boxH,
-          item.offsetX || 0,
-          item.offsetY || 0,
-          item.scale || 1
-        );
+    drawImageCover(
 
-      }
+      pctx,
 
-      /* circle */
-      else if (item.isCircle) {
+      item.imgObj,
 
-        drawCircle(
-          pctx,
-          item.imgObj,
-          item.x,
-          item.y,
-          item.diameterPx,
-          item.offsetX || 0,
-          item.offsetY || 0,
-          item.scale || 1
-        );
+      item.x,
+      item.y,
 
-      }
+      item.width,
+      item.height,
 
-    }
+      item.offsetX,
+      item.offsetY,
+
+      item.scale
+
+    );
+
+  }
+
+  /* =========================
+     CIRCLE
+  ========================= */
+  else if (
+    item.type ===
+    "circle"
+  ) {
+
+    drawCircle(
+
+      pctx,
+
+      item.imgObj,
+
+      item.x,
+      item.y,
+
+      item.diameter,
+
+      item.offsetX,
+      item.offsetY,
+
+      item.scale
+
+    );
+
+  }
+
+}
+
+
 
     pages.push(pc);
 
@@ -109,6 +136,9 @@ function addFooter(
   lastCanvas
 ) {
 
+  /* =========================
+     HIDE INFO
+  ========================= */
   if (
     hideInfo?.checked
   ) return lastCanvas;
@@ -127,28 +157,39 @@ function addFooter(
   const footerY =
     fullH - 120;
 
+  /* =========================
+     GARIS FOOTER
+  ========================= */
   ctx2.beginPath();
+
   ctx2.moveTo(
-    0,
+    40,
     footerY - 30
   );
 
   ctx2.lineTo(
-    fullW,
+    fullW - 40,
     footerY - 30
   );
 
   ctx2.strokeStyle =
     "#111";
 
-  ctx2.lineWidth = 3;
+  ctx2.lineWidth = 2;
+
   ctx2.stroke();
 
+  /* =========================
+     BRAND
+  ========================= */
   ctx2.fillStyle =
     "#111";
 
   ctx2.font =
-    "bold 30px Poppins";
+    "28px Poppins";
+
+  ctx2.textAlign =
+    "left";
 
   ctx2.fillText(
     "SEDULUR FOTO COPY",
@@ -156,8 +197,11 @@ function addFooter(
     footerY
   );
 
+  /* =========================
+     LABEL
+  ========================= */
   ctx2.font =
-    "18px Poppins";
+    "16px Poppins";
 
   ctx2.fillStyle =
     "#666";
@@ -168,17 +212,26 @@ function addFooter(
     footerY + 28
   );
 
+  ctx2.textAlign =
+    "right";
+
   ctx2.fillText(
     "HARGA",
-    fullW - 180,
+    fullW - 40,
     footerY + 28
   );
 
+  /* =========================
+     NAMA
+  ========================= */
   ctx2.font =
-    "bold 26px Poppins";
+    "24px Poppins";
 
   ctx2.fillStyle =
     "#111";
+
+  ctx2.textAlign =
+    "left";
 
   ctx2.fillText(
     userName?.value
@@ -188,11 +241,30 @@ function addFooter(
     footerY + 58
   );
 
+  /* =========================
+     HARGA
+  ========================= */
+  const priceDisplay =
+    document.getElementById(
+      "priceDisplay"
+    );
+
+  const hargaText =
+    priceDisplay?.textContent
+      ?.replace(
+        "Harga: ",
+        ""
+      ) || "Rp 0";
+
+  ctx2.font =
+    "24px Poppins";
+
+  ctx2.textAlign =
+    "right";
+
   ctx2.fillText(
-    formatRupiah(
-      manualHargaInput?.value
-    ),
-    fullW - 180,
+    hargaText,
+    fullW - 40,
     footerY + 58
   );
 

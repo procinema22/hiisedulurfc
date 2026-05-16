@@ -98,59 +98,99 @@
       hidden
     >
 
-    <!-- HARGA MANUAL FINAL -->
-    <div class="switch-wrap">
-      <span>Harga Manual</span>
+ <!-- =========================
+     HARGA SYSTEM
+========================= -->
 
-      <label class="switch">
-        <input
-          type="checkbox"
-          id="manualHargaCheckbox"
-          checked
-          disabled
-        >
-        <span class="slider"></span>
-      </label>
-    </div>
+<label>
+  Harga Dasar (Rp)
+</label>
 
-    <div id="manualHargaBox" style="display:block;">
-      <label>Harga Manual (Rp)</label>
+<input
+  id="manualHargaInput"
+  type="number"
+  value="500"
+  min="500"
+  step="500"
+>
 
-      <input
-        id="manualHargaInput"
-        type="number"
-        value="500"
-        min="500"
-        step="500"
-      >
-    </div>
+<!-- SWITCH CUSTOM -->
+<div class="switch-wrap">
 
-    <!-- NAMA -->
-    <label>
-      Nama Pelanggan
-      <span style="color:red;">*</span>
-    </label>
+  <span>
+    Tambahan Custom
+  </span>
+
+  <label class="switch">
 
     <input
-      id="userName"
-      type="text"
-      placeholder="Nama pelanggan"
-      required
+      type="checkbox"
+      id="extraPriceCheckbox"
     >
 
-    <small>
-      Wajib diisi sebelum preview / buat kolase
-    </small>
+    <span class="slider"></span>
 
-    <!-- HIDE NAME -->
-    <div class="switch-wrap">
-      <span>Sembunyikan Nama</span>
+  </label>
 
-      <label class="switch">
-        <input type="checkbox" >
-        <span class="slider"></span>
-      </label>
-    </div>
+</div>
+
+<!-- CUSTOM PRICE -->
+<div
+  id="extraPriceBox"
+  style="display:none;"
+>
+
+  <label>
+    Biaya Custom (+)
+  </label>
+
+  <input
+    id="extraPriceInput"
+    type="number"
+    value="0"
+    min="0"
+    step="500"
+  >
+
+</div>
+ 
+<!-- NAMA -->
+<label>
+  Nama Pelanggan
+  <span style="color:red;">*</span>
+</label>
+
+<input
+  type="text"
+  id="userName"
+  placeholder="Nama pelanggan"
+/>
+
+<small>
+  Wajib diisi sebelum preview / buat kolase
+</small>
+
+<!-- HIDE NAME -->
+<div class="switch-wrap">
+
+  <span>
+    Sembunyikan Nama
+  </span>
+
+  <label class="switch">
+
+    <input
+      type="checkbox"
+      id="hideInfo"
+    />
+
+    <span class="slider"></span>
+
+  </label>
+
+</div>
+
+
 
     <!-- PRICE -->
     <div class="price" id="priceDisplay">
@@ -160,39 +200,129 @@
     <!-- BATCH -->
     <div id="batchList"></div>
 
-    <!-- ACCORDION -->
-    <div class="accordion">
+  
 
-      <button
-        type="button"
-        class="accordion-btn"
-        onclick="toggleMargin()"
-      >
-        Margin Kertas ▼
-      </button>
+<!-- =========================
+     MARGIN SYSTEM
+========================= -->
 
-      <div
-        id="marginSection"
-        class="accordion-content"
-      >
+<!-- SWITCH MARGIN -->
+<div class="switch-wrap">
 
-        <label>Margin Atas (mm)</label>
-        <input id="marginTop" type="number" value="10">
+  <span>
+    Aktifkan Margin
+  </span>
 
-        <label>Margin Bawah (mm)</label>
-        <input id="marginBottom" type="number" value="10">
+  <label class="switch">
 
-        <label>Margin Kiri (mm)</label>
-        <input id="marginLeft" type="number" value="10">
+    <input
+      type="checkbox"
+      id="enableMargin"
+    >
 
-        <label>Margin Kanan (mm)</label>
-        <input id="marginRight" type="number" value="10">
+    <span class="slider"></span>
 
-        <label>Gap antar foto (px)</label>
-        <input id="gap" type="number" value="20">
+  </label>
 
-      </div>
-    </div>
+</div>
+
+<!-- CUSTOM TEXT -->
+<div
+  id="customTextBox"
+  style="display:none;"
+>
+<label>Ukuran Font</label>
+
+<input
+  type="number"
+  id="fontSizeInput"
+  value="38"
+  min="10"
+  max="100"
+/>
+
+  <label>
+    Judul Atas
+  </label>
+
+  <input
+    type="text"
+    id="customTextInput"
+    placeholder="Contoh: Laporan Praktikum"
+    maxlength="40"
+  >
+
+</div>
+
+<!-- ACCORDION -->
+<div class="accordion">
+
+  <button
+    type="button"
+    class="accordion-btn"
+    onclick="toggleMargin()"
+  >
+    Margin Kertas ▼
+  </button>
+
+  <div
+    id="marginSection"
+    class="accordion-content"
+  >
+
+    <label>
+      Margin Atas (mm)
+    </label>
+
+    <input
+      id="marginTop"
+      type="number"
+      value="10"
+    >
+
+    <label>
+      Margin Bawah (mm)
+    </label>
+
+    <input
+      id="marginBottom"
+      type="number"
+      value="10"
+    >
+
+    <label>
+      Margin Kiri (mm)
+    </label>
+
+    <input
+      id="marginLeft"
+      type="number"
+      value="10"
+    >
+
+    <label>
+      Margin Kanan (mm)
+    </label>
+
+    <input
+      id="marginRight"
+      type="number"
+      value="10"
+    >
+
+    <label>
+      Gap antar foto (px)
+    </label>
+
+    <input
+      id="gap"
+      type="number"
+      value="20"
+    >
+
+  </div>
+
+</div>
 
     <!-- WATERMARK -->
     <div class="switch-wrap">
@@ -318,7 +448,7 @@
 <!-- ===============================
      JS FILES
 ================================ -->
-<script type="module" src="js/main.js?v=2026"></script>
+<script type="module" src="js/main.js"></script>
 
 </body>
 </html>

@@ -1,7 +1,8 @@
+
 /* =====================================
    FILE: js/layout.js
-   FINAL FIX FOOTER SAFE PAGE 1
-   Jika menyentuh footer -> page berikutnya
+   FINAL CLEAN CONTRACT VERSION
+   CONSISTENT PLACEMENT SCHEMA
 ===================================== */
 
 import {
@@ -21,7 +22,9 @@ import {
   loadImage
 } from "./helpers.js";
 
-/* tinggi footer page 1 */
+/* =====================================
+   FOOTER SAFE AREA PAGE 1
+===================================== */
 const FOOTER_HEIGHT = 220;
 
 /* =====================================
@@ -56,18 +59,14 @@ export async function buildPlacementsForPages() {
 
   let pageIndex = 0;
 
-  let x =
-    margin.left;
-
-  let y =
-    margin.top;
+  let x = margin.left;
+  let y = margin.top;
 
   let rowMaxH = 0;
 
-  /* =========================
-     batas bawah tiap halaman
-     page 1 sisakan footer
-  ========================= */
+  /* =================================
+     PAGE BOTTOM LIMIT
+  ================================= */
   function bottomLimit() {
 
     if (pageIndex === 0) {
@@ -87,7 +86,9 @@ export async function buildPlacementsForPages() {
 
   }
 
-  /* pindah page */
+  /* =================================
+     NEXT PAGE
+  ================================= */
   function nextPage() {
 
     pageIndex++;
@@ -96,30 +97,27 @@ export async function buildPlacementsForPages() {
       pageIndex
     ] = [];
 
-    x =
-      margin.left;
-
-    y =
-      margin.top;
+    x = margin.left;
+    y = margin.top;
 
     rowMaxH = 0;
 
   }
 
-  /* =====================================
-     LOOP ALL BATCH
-  ===================================== */
+  /* =================================
+     LOOP ALL BATCHES
+  ================================= */
   for (const batch of state.batches) {
 
     const mode =
       batch.mode || "normal";
 
-    /* =================================
+    /* =============================
        MODE CIRCLE
-    ================================= */
+    ============================= */
     if (mode === "circle") {
 
-      let dCm =
+      const diameterCm =
         Math.max(
           1,
           num(
@@ -128,8 +126,8 @@ export async function buildPlacementsForPages() {
           )
         );
 
-      const diameterPx =
-        dCm *
+      const diameter =
+        diameterCm *
         PX_PER_CM;
 
       const copies =
@@ -152,15 +150,15 @@ export async function buildPlacementsForPages() {
           if (!imgObj)
             continue;
 
-          /* pindah baris */
+          /* ======================
+             PINDAH BARIS
+          ====================== */
           if (
-            x + diameterPx >
-            fullW -
-              margin.right
+            x + diameter >
+            fullW - margin.right
           ) {
 
-            x =
-              margin.left;
+            x = margin.left;
 
             y +=
               rowMaxH +
@@ -169,10 +167,13 @@ export async function buildPlacementsForPages() {
             rowMaxH = 0;
 
           }
+          
 
-          /* kalau sentuh footer -> next page */
+          /* ======================
+             NEXT PAGE
+          ====================== */
           if (
-            y + diameterPx >
+            y + diameter >
             bottomLimit()
           ) {
 
@@ -180,9 +181,14 @@ export async function buildPlacementsForPages() {
 
           }
 
+          /* ======================
+             SAVE PLACEMENT
+          ====================== */
           state.placementsByPage[
             pageIndex
           ].push({
+
+            type: "circle",
 
             file,
             imgObj,
@@ -190,9 +196,7 @@ export async function buildPlacementsForPages() {
             x,
             y,
 
-            diameterPx,
-
-            isCircle: true,
+            diameter,
 
             offsetX: 0,
             offsetY: 0,
@@ -204,11 +208,11 @@ export async function buildPlacementsForPages() {
           rowMaxH =
             Math.max(
               rowMaxH,
-              diameterPx
+              diameter
             );
 
           x +=
-            diameterPx +
+            diameter +
             gap;
 
         }
@@ -217,16 +221,19 @@ export async function buildPlacementsForPages() {
 
     }
 
-    /* =================================
+    /* =============================
        MODE RECTANGLE
-    ================================= */
+    ============================= */
     else {
 
-      let wcm, hcm;
+      let wcm;
+      let hcm;
 
+      /* =========================
+         CUSTOM SIZE
+      ========================= */
       if (
-        batch.size ===
-        "custom"
+        batch.size === "custom"
       ) {
 
         wcm =
@@ -241,7 +248,12 @@ export async function buildPlacementsForPages() {
             3
           );
 
-      } else {
+      }
+
+      /* =========================
+         PRESET SIZE
+      ========================= */
+      else {
 
         [wcm, hcm] =
           (
@@ -253,11 +265,11 @@ export async function buildPlacementsForPages() {
 
       }
 
-      const boxW =
+      const width =
         wcm *
         PX_PER_CM;
 
-      const boxH =
+      const height =
         hcm *
         PX_PER_CM;
 
@@ -281,15 +293,15 @@ export async function buildPlacementsForPages() {
           if (!imgObj)
             continue;
 
-          /* pindah baris */
+          /* ======================
+             PINDAH BARIS
+          ====================== */
           if (
-            x + boxW >
-            fullW -
-              margin.right
+            x + width >
+            fullW - margin.right
           ) {
 
-            x =
-              margin.left;
+            x = margin.left;
 
             y +=
               rowMaxH +
@@ -299,9 +311,11 @@ export async function buildPlacementsForPages() {
 
           }
 
-          /* kalau tabrak footer -> next page */
+          /* ======================
+             NEXT PAGE
+          ====================== */
           if (
-            y + boxH >
+            y + height >
             bottomLimit()
           ) {
 
@@ -309,9 +323,14 @@ export async function buildPlacementsForPages() {
 
           }
 
+          /* ======================
+             SAVE PLACEMENT
+          ====================== */
           state.placementsByPage[
             pageIndex
           ].push({
+
+            type: "rectangle",
 
             file,
             imgObj,
@@ -319,10 +338,10 @@ export async function buildPlacementsForPages() {
             x,
             y,
 
-            boxW,
-            boxH,
+            width,
+            height,
 
-            isRectangle: true,
+            adjustable: true,
 
             offsetX: 0,
             offsetY: 0,
@@ -334,11 +353,11 @@ export async function buildPlacementsForPages() {
           rowMaxH =
             Math.max(
               rowMaxH,
-              boxH
+              height
             );
 
           x +=
-            boxW +
+            width +
             gap;
 
         }
@@ -350,3 +369,4 @@ export async function buildPlacementsForPages() {
   }
 
 }
+

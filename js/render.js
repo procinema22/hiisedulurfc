@@ -1,10 +1,6 @@
 /* =====================================
    FILE: js/render.js
-   FINAL FULL VERSION
-   - Preview bersih
-   - Footer hanya saat nama tampil
-   - Hide nama ON = footer hilang
-   - Multi page stabil
+   FINAL CLEAN CONTRACT VERSION
 ===================================== */
 
 import {
@@ -35,31 +31,58 @@ export const FOOTER_HEIGHT = 220;
    CEK HIDE INFO
 ===================================== */
 function isHideInfo() {
-  return document.getElementById("hideInfo")?.checked || false;
+
+  return (
+    document.getElementById(
+      "hideInfo"
+    )?.checked || false
+  );
+
 }
 
 /* =====================================
    DRAW RECTANGLE COVER
 ===================================== */
 export function drawImageCover(
+
   ctxLocal,
   img,
+
   x,
   y,
-  boxW,
-  boxH,
+
+  width,
+  height,
+
   offsetX = 0,
   offsetY = 0,
-  scaleZoom = 1
+
+  scaleZoom = 1,
+
+  rotateLandscapeToPortrait = true
+
 ) {
 
-  const iw = img.width;
-  const ih = img.height;
+  let iw = img.width;
+  let ih = img.height;
+
+  let rotate = false;
+
+  if (
+    rotateLandscapeToPortrait &&
+    iw > ih
+  ) {
+
+    rotate = true;
+
+    [iw, ih] = [ih, iw];
+
+  }
 
   const baseScale =
     Math.max(
-      boxW / iw,
-      boxH / ih
+      width / iw,
+      height / ih
     );
 
   const scale =
@@ -74,44 +97,74 @@ export function drawImageCover(
 
   const dx =
     x +
-    (boxW - drawW) / 2 +
+    (width - drawW) / 2 +
     offsetX;
 
   const dy =
     y +
-    (boxH - drawH) / 2 +
+    (height - drawH) / 2 +
     offsetY;
 
   ctxLocal.save();
 
   ctxLocal.beginPath();
+
   ctxLocal.rect(
     x,
     y,
-    boxW,
-    boxH
+    width,
+    height
   );
 
   ctxLocal.clip();
 
-  ctxLocal.drawImage(
-    img,
-    dx,
-    dy,
-    drawW,
-    drawH
-  );
+  if (rotate) {
+
+    ctxLocal.save();
+
+    ctxLocal.translate(
+      dx + drawW / 2,
+      dy + drawH / 2
+    );
+
+    ctxLocal.rotate(
+      Math.PI / 2
+    );
+
+    ctxLocal.drawImage(
+      img,
+      -drawH / 2,
+      -drawW / 2,
+      drawH,
+      drawW
+    );
+
+    ctxLocal.restore();
+
+  } else {
+
+    ctxLocal.drawImage(
+      img,
+      dx,
+      dy,
+      drawW,
+      drawH
+    );
+
+  }
 
   ctxLocal.restore();
 
-  ctxLocal.strokeStyle = "#000";
+  ctxLocal.strokeStyle =
+    "#000";
+
   ctxLocal.lineWidth = 2;
 
   ctxLocal.strokeRect(
     x,
     y,
-    boxW,
-    boxH
+    width,
+    height
   );
 
 }
@@ -120,23 +173,36 @@ export function drawImageCover(
    DRAW CIRCLE
 ===================================== */
 export function drawCircle(
+
   ctxLocal,
   img,
+
   x,
   y,
+
   diameter,
+
   offsetX = 0,
   offsetY = 0,
+
   scaleZoom = 1
+
 ) {
 
-  const r = diameter / 2;
+  const r =
+    diameter / 2;
 
-  const cx = x + r;
-  const cy = y + r;
+  const cx =
+    x + r;
 
-  const iw = img.width;
-  const ih = img.height;
+  const cy =
+    y + r;
+
+  const iw =
+    img.width;
+
+  const ih =
+    img.height;
 
   const baseScale =
     Math.max(
@@ -155,10 +221,12 @@ export function drawCircle(
     ih * scale;
 
   const dx =
-    cx - drawW / 2 + offsetX;
+    cx - drawW / 2 +
+    offsetX;
 
   const dy =
-    cy - drawH / 2 + offsetY;
+    cy - drawH / 2 +
+    offsetY;
 
   ctxLocal.save();
 
@@ -195,7 +263,10 @@ export function drawCircle(
   );
 
   ctxLocal.lineWidth = 2;
-  ctxLocal.strokeStyle = "#000";
+
+  ctxLocal.strokeStyle =
+    "#000";
+
   ctxLocal.stroke();
 
 }
@@ -203,49 +274,9 @@ export function drawCircle(
 /* =====================================
    DRAW FOOTER
 ===================================== */
-function drawFooter(pctx) {
+function drawFooter() {
 
-  const y =
-    (FULL_H - FOOTER_HEIGHT) *
-    PREVIEW_SCALE;
-
-  pctx.fillStyle = "#fff";
-
-  pctx.fillRect(
-    0,
-    y,
-    FULL_W * PREVIEW_SCALE,
-    FOOTER_HEIGHT * PREVIEW_SCALE
-  );
-
-  pctx.strokeStyle = "#000";
-  pctx.lineWidth = 2;
-
-  pctx.beginPath();
-
-  pctx.moveTo(40, y);
-
-  pctx.lineTo(
-    FULL_W * PREVIEW_SCALE - 40,
-    y
-  );
-
-  pctx.stroke();
-
-  pctx.fillStyle = "#000";
-  pctx.font = "bold 18px Arial";
-
-  pctx.fillText(
-    "NAMA PEMESAN",
-    40,
-    y + 35
-  );
-
-  pctx.fillText(
-    "HARGA",
-    FULL_W * PREVIEW_SCALE - 220,
-    y + 35
-  );
+  return;
 
 }
 
@@ -259,14 +290,42 @@ export async function renderAllPages() {
   const hideInfo =
     isHideInfo();
 
+  const enableMargin =
+    document.getElementById(
+      "enableMargin"
+    );
+
+  const customTextInput =
+    document.getElementById(
+      "customTextInput"
+    );
+
+    const marginTopInput =
+    document.getElementById(
+      "marginTop"
+    );
+  
+  const marginTop =
+    parseInt(
+      marginTopInput?.value || 10
+    );
+  
+  const extraTop =
+    enableMargin?.checked
+      ? marginTop * 8
+      : 0;
+
   for (
     let i = 0;
-    i < state.placementsByPage.length;
+    i <
+    state.placementsByPage
+      .length;
     i++
   ) {
 
     const page =
-      state.placementsByPage[i];
+      state
+        .placementsByPage[i];
 
     const pc =
       document.createElement(
@@ -284,7 +343,8 @@ export async function renderAllPages() {
     const pctx =
       pc.getContext("2d");
 
-    pctx.fillStyle = "#fff";
+    pctx.fillStyle =
+      "#fff";
 
     pctx.fillRect(
       0,
@@ -293,55 +353,139 @@ export async function renderAllPages() {
       pc.height
     );
 
+    /* =========================
+   CUSTOM TITLE
+========================= */
+if (enableMargin?.checked) {
+
+  const title =
+    customTextInput?.value?.trim();
+
+  if (title) {
+
+    pctx.save();
+
+    const fontSizeInput =
+  document.getElementById(
+    "fontSizeInput"
+  );
+
+const fontSize =
+  parseInt(
+    fontSizeInput?.value || 38
+  );
+
+pctx.font =
+  `bold ${
+    fontSize * PREVIEW_SCALE
+  }px "Times New Roman"`;
+
+    pctx.fillStyle =
+      "#000";
+
+    pctx.textAlign =
+      "center";
+
+    pctx.fillText(
+      title,
+      pc.width / 2,
+      (extraTop * PREVIEW_SCALE)
+    );
+
+    pctx.restore();
+
+  }
+
+}
+
+    /* =========================
+       RENDER ITEMS
+    ========================= */
     for (const item of page) {
 
-      if (item.isRectangle) {
+      if (
+        item.type ===
+        "rectangle"
+      ) {
 
         drawImageCover(
+
           pctx,
+
           item.imgObj,
-          item.x * PREVIEW_SCALE,
-          item.y * PREVIEW_SCALE,
-          item.boxW * PREVIEW_SCALE,
-          item.boxH * PREVIEW_SCALE,
-          (item.offsetX || 0) *
+
+          item.x *
             PREVIEW_SCALE,
-          (item.offsetY || 0) *
+
+            (item.y + extraTop + 60) *
             PREVIEW_SCALE,
-          item.scale || 1
+
+          item.width *
+            PREVIEW_SCALE,
+
+          item.height *
+            PREVIEW_SCALE,
+
+          item.offsetX *
+            PREVIEW_SCALE,
+
+          item.offsetY *
+            PREVIEW_SCALE,
+
+          item.scale
+
         );
 
       }
 
-      else if (item.isCircle) {
+      else if (
+        item.type ===
+        "circle"
+      ) {
 
         drawCircle(
+
           pctx,
+
           item.imgObj,
-          item.x * PREVIEW_SCALE,
-          item.y * PREVIEW_SCALE,
-          item.diameterPx *
+
+          item.x *
             PREVIEW_SCALE,
-          (item.offsetX || 0) *
+
+          (item.y + extraTop) *
             PREVIEW_SCALE,
-          (item.offsetY || 0) *
+
+          item.diameter *
             PREVIEW_SCALE,
-          item.scale || 1
+
+          item.offsetX *
+            PREVIEW_SCALE,
+
+          item.offsetY *
+            PREVIEW_SCALE,
+
+          item.scale
+
         );
 
       }
 
     }
 
-    /* footer hanya page 1 jika nama tampil */
     if (
       i === 0 &&
       !hideInfo
     ) {
-      
+
+      drawFooter(
+        pctx
+      );
+
     }
 
-    state.pagesCache.push(pc);
+    state.pagesCache.push(
+      pc
+    );
 
   }
 
@@ -392,25 +536,30 @@ export function showPageAtIndex(i) {
 ===================================== */
 export function updatePageNav() {
 
-  if (!pageNav) return;
+  if (!pageNav)
+    return;
 
   pageNav.style.display =
-    state.pagesCache.length > 1
+    state.pagesCache.length >
+    1
       ? "flex"
       : "none";
 
   pageIndicator.textContent =
     `Halaman ${
-      state.currentPageIndex + 1
+      state.currentPageIndex +
+      1
     } / ${
       state.pagesCache.length
     }`;
 
   prevPageBtn.disabled =
-    state.currentPageIndex === 0;
+    state.currentPageIndex ===
+    0;
 
   nextPageBtn.disabled =
     state.currentPageIndex ===
-    state.pagesCache.length - 1;
+    state.pagesCache.length -
+      1;
 
 }

@@ -189,6 +189,12 @@ function () {
 ================================= */
 function initApp() {
 
+  setupHideNameSwitch();
+
+setupMarginSystem();
+
+console.log("APP READY");
+
   clearCanvas();
 
   refreshBatchList();
@@ -241,4 +247,80 @@ function initApp() {
 window.addEventListener(
   "DOMContentLoaded",
   initApp
+  
+  
 );
+/* =========================
+   MARGIN + CUSTOM TEXT
+========================= */
+
+function setupMarginSystem() {
+
+  const enableMargin =
+    document.getElementById(
+      "enableMargin"
+    );
+
+  const customTextBox =
+    document.getElementById(
+      "customTextBox"
+    );
+
+  if (
+    !enableMargin ||
+    !customTextBox
+  ) return;
+
+  function applyMarginState() {
+
+    customTextBox.style.display =
+      enableMargin.checked
+        ? "block"
+        : "none";
+
+  }
+
+  enableMargin.addEventListener(
+    "change",
+    applyMarginState
+  );
+
+  applyMarginState();
+
+}
+/* =========================
+   EXTRA PRICE SYSTEM
+========================= */
+
+function setupExtraPriceSystem() {
+
+  const checkbox =
+    document.getElementById(
+      "extraPriceCheckbox"
+    );
+
+  const box =
+    document.getElementById(
+      "extraPriceBox"
+    );
+
+  if (!checkbox || !box)
+    return;
+
+  function applyState() {
+
+    box.style.display =
+      checkbox.checked
+        ? "block"
+        : "none";
+
+  }
+
+  checkbox.addEventListener(
+    "change",
+    applyState
+  );
+
+  applyState();
+
+}

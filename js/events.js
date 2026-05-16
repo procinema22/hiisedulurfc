@@ -1,7 +1,7 @@
+ 
 /* =====================================
    FILE: js/events.js
-   TRUE FINAL VERSION
-   + FIX SEMBUNYIKAN NAMA
+   FINAL CLEAN CONTRACT VERSION
 ===================================== */
 
 console.log("EVENTS FINAL LOADED");
@@ -40,14 +40,18 @@ import {
   updatePricePreview
 } from "./batch.js";
 
-import { autoPreview } from "./layout.js";
+import {
+  autoPreview
+} from "./layout.js";
 
 import {
   showPageAtIndex,
   renderAllPages
 } from "./render.js";
 
-import { openPdfFile } from "./pdf.js";
+import {
+  openPdfFile
+} from "./pdf.js";
 
 import {
   clearCanvas,
@@ -62,6 +66,7 @@ import {
 window.showPopup = function (
   msg = "Notifikasi"
 ) {
+
   const popup =
     document.getElementById(
       "popupNotif"
@@ -72,11 +77,14 @@ window.showPopup = function (
       "popupText"
     );
 
-  if (!popup || !text) return;
+  if (!popup || !text)
+    return;
 
   text.textContent = msg;
 
-  popup.classList.add("show");
+  popup.classList.add(
+    "show"
+  );
 
   clearTimeout(
     window.popupTimer
@@ -84,23 +92,40 @@ window.showPopup = function (
 
   window.popupTimer =
     setTimeout(() => {
+
       popup.classList.remove(
         "show"
       );
+
     }, 2200);
+
 };
 
 /* =====================================
    VALIDASI NAMA
 ===================================== */
+
 function cekNamaPelanggan() {
 
-  if (
+  const hideInfo =
     document.getElementById(
       "hideInfo"
-    )?.checked
+    );
+
+  const userName =
+    document.getElementById(
+      "userName"
+    );
+
+  /* =========================
+     JIKA HIDE INFO AKTIF
+  ========================= */
+  if (
+    hideInfo?.checked
   ) {
+
     return true;
+
   }
 
   const nama =
@@ -108,17 +133,46 @@ function cekNamaPelanggan() {
 
   if (!nama) {
 
-    showPopup(
-      "Nama pelanggan wajib diisi"
-    );
+    const popup =
+      document.getElementById(
+        "popupNotif"
+      );
+
+    const popupText =
+      document.getElementById(
+        "popupText"
+      );
+
+    if (popup && popupText) {
+
+      popupText.textContent =
+        "Nama pelanggan wajib diisi";
+
+      popup.classList.add(
+        "show"
+      );
+
+      setTimeout(() => {
+
+        popup.classList.remove(
+          "show"
+        );
+
+      }, 2200);
+
+    }
 
     userName?.focus();
 
     return false;
+
   }
 
   return true;
+
 }
+
+
 
 /* =====================================
    REFRESH UNIVERSAL
@@ -126,8 +180,11 @@ function cekNamaPelanggan() {
 async function refreshAll() {
 
   if (!state.batches.length) {
+
     updatePricePreview();
+
     return;
+
   }
 
   showLoading();
@@ -142,11 +199,15 @@ async function refreshAll() {
       state.currentPageIndex || 0
     );
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(err);
 
-  } finally {
+  }
+
+  finally {
 
     hideLoading();
 
@@ -161,37 +222,41 @@ window.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    /* manual price */
-    manualHargaCheckbox?.addEventListener(
-      "change",
-      () => {
+    /* =========================
+       MANUAL PRICE
+    ========================= */
+    manualHargaCheckbox
+      ?.addEventListener(
+        "change",
+        () => {
 
-        const aktif =
-          manualHargaCheckbox.checked;
+          const aktif =
+            manualHargaCheckbox
+              .checked;
 
-        if (manualHargaBox) {
-          manualHargaBox.style.display =
-            aktif
-              ? "block"
-              : "none";
+          if (manualHargaBox) {
+
+            manualHargaBox.style.display =
+              aktif
+                ? "block"
+                : "none";
+
+          }
+
+          updatePricePreview();
+
+          
+
         }
+      );
 
-        updatePricePreview();
-
-        showPopup(
-          aktif
-            ? "Harga manual aktif"
-            : "Harga otomatis aktif"
-        );
-
-      }
-    );
-
-    /* =====================================
-       SEMBUNYIKAN NAMA
-    ===================================== */
+    /* =========================
+       HIDE INFO
+    ========================= */
     document
-      .getElementById("hideInfo")
+      .getElementById(
+        "hideInfo"
+      )
       ?.addEventListener(
         "change",
         async e => {
@@ -205,56 +270,65 @@ window.addEventListener(
               aktif;
 
             if (aktif) {
+
               userName.blur();
+
             }
 
           }
 
-          showPopup(
-            aktif
-              ? "Info pelanggan disembunyikan"
-              : "Info pelanggan ditampilkan"
-          );
+          
 
           await refreshAll();
 
         }
       );
 
-    /* preview */
+    /* =========================
+       PREVIEW
+    ========================= */
     previewBtn?.addEventListener(
       "click",
       async () => {
-
+    
         if (!state.batches.length) {
-          toast("Belum ada foto");
+    
+          toast(
+            "Belum ada foto"
+          );
+    
           return;
+    
         }
-
-        if (!cekNamaPelanggan())
-          return;
-
+    
         await refreshAll();
-
+    
         toast(
           "Preview selesai"
         );
-
+    
       }
     );
-
-    /* generate */
+    /* =========================
+       GENERATE
+    ========================= */
     generateBtn?.addEventListener(
       "click",
       async () => {
 
         if (!state.batches.length) {
-          toast("Belum ada foto");
+
+          toast(
+            "Belum ada foto"
+          );
+
           return;
+
         }
 
-        if (!cekNamaPelanggan())
-          return;
+        if (
+          !cekNamaPelanggan()
+        ) return;
 
         await refreshAll();
 
@@ -265,18 +339,26 @@ window.addEventListener(
       }
     );
 
-    /* pdf */
+    /* =========================
+       PDF
+    ========================= */
     downloadPdf?.addEventListener(
       "click",
       async () => {
 
         if (!state.batches.length) {
-          toast("Belum ada foto");
+
+          toast(
+            "Belum ada foto"
+          );
+
           return;
+
         }
 
-        if (!cekNamaPelanggan())
-          return;
+        if (
+          !cekNamaPelanggan()
+        ) return;
 
         await refreshAll();
 
@@ -289,9 +371,13 @@ window.addEventListener(
       }
     );
 
-    /* reset */
+    /* =========================
+       RESET
+    ========================= */
     document
-      .getElementById("reset")
+      .getElementById(
+        "reset"
+      )
       ?.addEventListener(
         "click",
         () => {
@@ -305,12 +391,16 @@ window.addEventListener(
           updatePricePreview();
 
           if (pageNav) {
+
             pageNav.style.display =
               "none";
+
           }
 
           if (upload) {
+
             upload.value = "";
+
           }
 
           toast(
@@ -320,74 +410,96 @@ window.addEventListener(
         }
       );
 
-    /* page nav */
-    prevPageBtn?.addEventListener(
-      "click",
-      () => {
-        showPageAtIndex(
-          state.currentPageIndex - 1
-        );
-      }
-    );
+    /* =========================
+       PAGE NAV
+    ========================= */
+    prevPageBtn
+      ?.addEventListener(
+        "click",
+        () => {
 
-    nextPageBtn?.addEventListener(
-      "click",
-      () => {
-        showPageAtIndex(
-          state.currentPageIndex + 1
-        );
-      }
-    );
+          showPageAtIndex(
+            state.currentPageIndex - 1
+          );
 
-    /* mode */
-    modeSelect?.addEventListener(
-      "change",
-      async () => {
-
-        if (circleControls) {
-          circleControls.style.display =
-            modeSelect.value ===
-            "circle"
-              ? "block"
-              : "none";
         }
+      );
 
-        if (customSize) {
-          customSize.style.display =
-            sizeSelect?.value ===
-              "custom" &&
-            modeSelect.value !==
+    nextPageBtn
+      ?.addEventListener(
+        "click",
+        () => {
+
+          showPageAtIndex(
+            state.currentPageIndex + 1
+          );
+
+        }
+      );
+
+    /* =========================
+       MODE
+    ========================= */
+    modeSelect
+      ?.addEventListener(
+        "change",
+        async () => {
+
+          if (circleControls) {
+
+            circleControls.style.display =
+              modeSelect.value ===
               "circle"
-              ? "flex"
-              : "none";
+                ? "block"
+                : "none";
+
+          }
+
+          if (customSize) {
+
+            customSize.style.display =
+              sizeSelect?.value ===
+                "custom" &&
+              modeSelect.value !==
+                "circle"
+                ? "flex"
+                : "none";
+
+          }
+
+          await refreshAll();
+
         }
+      );
 
-        await refreshAll();
+    /* =========================
+       SIZE
+    ========================= */
+    sizeSelect
+      ?.addEventListener(
+        "change",
+        async () => {
 
-      }
-    );
+          if (customSize) {
 
-    /* size */
-    sizeSelect?.addEventListener(
-      "change",
-      async () => {
+            customSize.style.display =
+              sizeSelect.value ===
+                "custom" &&
+              modeSelect?.value !==
+                "circle"
+                ? "flex"
+                : "none";
 
-        if (customSize) {
-          customSize.style.display =
-            sizeSelect.value ===
-              "custom" &&
-            modeSelect?.value !==
-              "circle"
-              ? "flex"
-              : "none";
+          }
+
+          await refreshAll();
+
         }
+      );
 
-        await refreshAll();
-
-      }
-    );
-
-    /* live input */
+    /* =========================
+       LIVE INPUT
+    ========================= */
     [
       marginTop,
       marginBottom,
@@ -435,7 +547,13 @@ canvas?.addEventListener(
 
     for (const item of page) {
 
-      if (item.isRectangle) {
+      /* =====================
+         RECTANGLE
+      ===================== */
+      if (
+        item.type ===
+        "rectangle"
+      ) {
 
         const x =
           item.x *
@@ -446,11 +564,11 @@ canvas?.addEventListener(
           PREVIEW_SCALE;
 
         const w =
-          item.boxW *
+          item.width *
           PREVIEW_SCALE;
 
         const h =
-          item.boxH *
+          item.height *
           PREVIEW_SCALE;
 
         if (
@@ -459,17 +577,26 @@ canvas?.addEventListener(
           my >= y &&
           my <= y + h
         ) {
+
           state.selectedPlacement =
             item;
+
           break;
+
         }
 
       }
 
-      else if (item.isCircle) {
+      /* =====================
+         CIRCLE
+      ===================== */
+      else if (
+        item.type ===
+        "circle"
+      ) {
 
         const r =
-          item.diameterPx *
+          item.diameter *
           PREVIEW_SCALE /
           2;
 
@@ -490,9 +617,12 @@ canvas?.addEventListener(
           );
 
         if (dist <= r) {
+
           state.selectedPlacement =
             item;
+
           break;
+
         }
 
       }
@@ -507,16 +637,20 @@ canvas?.addEventListener(
         true;
 
       state.dragStart = {
+
         x: e.clientX,
         y: e.clientY,
+
         ox:
           state
             .selectedPlacement
-            .offsetX || 0,
+            .offsetX,
+
         oy:
           state
             .selectedPlacement
-            .offsetY || 0
+            .offsetY
+
       };
 
     }
@@ -563,20 +697,26 @@ canvas?.addEventListener(
   }
 );
 
-/* drag end */
+/* =====================================
+   DRAG END
+===================================== */
 canvas?.addEventListener(
   "mouseup",
   () => {
+
     state.isDragging =
       false;
+
   }
 );
 
 canvas?.addEventListener(
   "mouseleave",
   () => {
+
     state.isDragging =
       false;
+
   }
 );
 
@@ -594,8 +734,9 @@ canvas?.addEventListener(
     e.preventDefault();
 
     let scale =
-      state.selectedPlacement
-        .scale || 1;
+      state
+        .selectedPlacement
+        .scale;
 
     scale +=
       e.deltaY < 0
@@ -620,3 +761,4 @@ canvas?.addEventListener(
   },
   { passive:false }
 );
+

@@ -231,7 +231,6 @@ function hitungHargaAI() {
   return total;
 
 }
-
 /* =====================================
    UPDATE PRICE
 ===================================== */
@@ -240,32 +239,133 @@ export function updatePricePreview() {
   if (!priceDisplay)
     return;
 
-  let harga = 0;
+  /* =========================
+     HARGA DASAR ADMIN
+  ========================= */
+  let totalHarga =
+    Math.max(
+      500,
+      parseInt(
+        manualHargaInput?.value
+      ) || 500
+    );
 
-  if (
-    manualHargaCheckbox?.checked
-  ) {
+  /* =========================
+     CEK CUSTOM
+  ========================= */
 
-    harga =
-      Math.max(
-        500,
-        parseInt(
-          manualHargaInput?.value
-        ) || 500
+  let isCustom = false;
+
+  /* =========================
+     CEK UKURAN BERBEDA
+  ========================= */
+  const ukuranSet =
+    new Set();
+
+  state.batches.forEach(
+    batch => {
+
+      ukuranSet.add(
+        batch.size
       );
 
-  } else {
+    }
+  );
 
-    harga =
-      hitungHargaAI();
+  if (ukuranSet.size > 1) {
+
+    isCustom = true;
 
   }
 
+  /* =========================
+     CEK MARGIN BERUBAH
+  ========================= */
+  const marginTop =
+    parseInt(
+      document.getElementById(
+        "marginTop"
+      )?.value || 10
+    );
+
+  const marginBottom =
+    parseInt(
+      document.getElementById(
+        "marginBottom"
+      )?.value || 10
+    );
+
+  const marginLeft =
+    parseInt(
+      document.getElementById(
+        "marginLeft"
+      )?.value || 10
+    );
+
+  const marginRight =
+    parseInt(
+      document.getElementById(
+        "marginRight"
+      )?.value || 10
+    );
+
+  if (
+    marginTop !== 10 ||
+    marginBottom !== 10 ||
+    marginLeft !== 10 ||
+    marginRight !== 10
+  ) {
+
+    isCustom = true;
+
+  }
+
+  /* =========================
+     CUSTOM +500
+  ========================= */
+  if (isCustom) {
+
+    totalHarga += 500;
+
+  }
+
+  /* =========================
+     EXTRA CUSTOM MANUAL
+  ========================= */
+  const extraPriceCheckbox =
+    document.getElementById(
+      "extraPriceCheckbox"
+    );
+
+  const extraPriceInput =
+    document.getElementById(
+      "extraPriceInput"
+    );
+
+  const biayaTambahan =
+    extraPriceCheckbox?.checked
+      ? Math.max(
+          0,
+          parseInt(
+            extraPriceInput?.value
+          ) || 0
+        )
+      : 0;
+
+  totalHarga +=
+    biayaTambahan;
+
+  /* =========================
+     RENDER
+  ========================= */
   priceDisplay.textContent =
     "Harga: " +
-    formatRupiah(harga);
+    formatRupiah(
+      totalHarga
+    );
 
 }
+
 
 /* =====================================
    INPUT MANUAL
